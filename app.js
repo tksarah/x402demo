@@ -207,33 +207,37 @@ function renderPaidArea(state) {
     const row = document.createElement("div");
     row.className = "row";
 
-    const payBtn = document.createElement("button");
-    payBtn.type = "button";
-    payBtn.className = "button";
-    payBtn.textContent = getPaid() ? "支払い済み" : "支払う";
-    payBtn.disabled = getPaid() || !payment;
-    payBtn.addEventListener("click", async () => {
-      if (!payment) return;
-      payBtn.disabled = true;
-      payBtn.textContent = "支払い処理中...";
+    // 支払い済みフラグが true の場合は「支払う」ボタンを表示しない
+    let payBtn = null;
+    if (!getPaid()) {
+      payBtn = document.createElement("button");
+      payBtn.type = "button";
+      payBtn.className = "button";
+      payBtn.textContent = "支払う";
+      payBtn.disabled = !payment;
+      payBtn.addEventListener("click", async () => {
+        if (!payment) return;
+        payBtn.disabled = true;
+        payBtn.textContent = "支払い処理中...";
 
-      const result = await payOnChain(payment);
-      if (!result.ok) {
-        renderPaidArea({
-          mode: "payment_required",
-          payment,
-          message: result.message,
-        });
-        return;
-      }
+        const result = await payOnChain(payment);
+        if (!result.ok) {
+          renderPaidArea({
+            mode: "payment_required",
+            payment,
+            message: result.message,
+          });
+          return;
+        }
 
-      setPayer(result.payer);
-      setTxHash(result.txHash);
-      updatePaymentBadge();
+        setPayer(result.payer);
+        setTxHash(result.txHash);
+        updatePaymentBadge();
 
-      // 送金が通ったら、すぐ検証を行い、詳細表示を試みる
-      requestPaidReport();
-    });
+        // 送金が通ったら、すぐ検証を行い、詳細表示を試みる
+        requestPaidReport();
+      });
+    }
 
     const retryBtn = document.createElement("button");
     retryBtn.type = "button";
@@ -244,7 +248,7 @@ function renderPaidArea(state) {
       requestPaidReport();
     });
 
-    row.appendChild(payBtn);
+    if (payBtn) row.appendChild(payBtn);
     row.appendChild(retryBtn);
 
     // txHash がある場合は、支払いプロンプトや "Txが見つかりません" を表示せず、
