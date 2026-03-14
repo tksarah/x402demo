@@ -179,7 +179,7 @@ function renderPaidArea(state) {
     // 折りたたみ表示にする（支払アドレス/txHashは展開情報として別表示）
     const detailsWrap = document.createElement("details");
     const summary = document.createElement("summary");
-    summary.textContent = "支払い情報（クリックで展開）";
+    summary.textContent = "支払い情報";
     detailsWrap.appendChild(summary);
     detailsWrap.appendChild(dl);
 
@@ -255,8 +255,9 @@ function renderPaidArea(state) {
       warn.textContent = state.message;
       container.appendChild(warn);
     }
-    container.appendChild(detailsWrap);
+    // ボタン群を先に追加し、その下に折りたたみを置く（要求により）
     container.appendChild(row);
+    container.appendChild(detailsWrap);
     return;
   }
 

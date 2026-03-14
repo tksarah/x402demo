@@ -35,45 +35,47 @@ body{
 @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
 
 .card{
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  background: linear-gradient(180deg, rgba(255,250,240,0.02), rgba(30,24,18,0.02));
   border:1px solid var(--glass-border);
   border-radius:var(--radius);
   padding:18px;
-  box-shadow:var(--neon-glow);
-  backdrop-filter: blur(8px) saturate(120%);
+  box-shadow: 0 8px 24px rgba(20,16,12,0.35);
+  backdrop-filter: blur(6px) saturate(110%);
 }
 
 .row{display:flex;gap:10px;align-items:center;margin-top:12px}
 
 .button{
-  appearance:none;border:0;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600;
-  color:#041023;background:linear-gradient(90deg,var(--accent-a),var(--accent-b));
-  box-shadow:0 8px 30px rgba(0,0,0,0.45), 0 0 18px rgba(127,90,240,0.18);
+  appearance:none;border:0;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700;
+  color:#ffffff;background:linear-gradient(90deg,var(--accent-a),var(--accent-b));
+  box-shadow:0 6px 18px rgba(20,16,12,0.45);
   transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
 }
-.button:hover:not([disabled]){transform:translateY(-3px);filter:brightness(1.03)}
+.button:hover:not([disabled]){transform:translateY(-2px);filter:brightness(0.98)}
 .button[disabled]{opacity:.6;cursor:not-allowed;transform:none}
 
-.badge{display:inline-block;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);font-family:var(--mono);font-size:.9rem}
+.badge{display:inline-block;padding:6px 12px;border-radius:999px;background:rgba(250,245,237,0.03);border:1px solid rgba(200,180,150,0.06);font-family:var(--mono);font-size:.95rem;color:var(--muted)}
 
-.pre{margin:10px 0 0;padding:14px;border-radius:12px;background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,0.03);white-space:pre-wrap;min-height:5.5em}
-.error{margin:10px 0 0;color:#ff6b6b}
+.pre{margin:10px 0 0;padding:14px;border-radius:12px;background:linear-gradient(180deg,rgba(250,245,237,0.02),rgba(230,220,200,0.01));border:1px solid rgba(200,180,150,0.04);white-space:pre-wrap;min-height:5.5em;color:#241a12}
+.error{margin:10px 0 0;color:#9b2b2b}
 
-.footer{margin-top:18px;font-size:0.9rem;color:var(--muted);display:flex;justify-content:flex-end}
+.footer{margin-top:18px;font-size:0.95rem;color:var(--muted);display:flex;justify-content:flex-end;gap:12px}
 
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;margin-top:10px}
 .kv dt{color:var(--muted)}
-.kv dd{margin:0}
+.kv dd{margin:0;color:#efe7d8}
 
-.payment-proof{margin-top:10px;padding:10px;border-radius:10px;background:linear-gradient(90deg,rgba(127,90,240,0.06),rgba(0,209,178,0.04));border:1px solid rgba(127,90,240,0.12)}
+.payment-proof{margin-top:10px;padding:10px;border-radius:10px;background:linear-gradient(90deg,rgba(166,124,82,0.06),rgba(122,168,116,0.04));border:1px solid rgba(160,130,95,0.08);color:#efe7d8}
 
-details summary{cursor:pointer;padding:8px 10px;border-radius:8px;background:linear-gradient(90deg,rgba(255,255,255,0.01),transparent)}
 
-.empha{font-weight:700;color:#eafffb;background:linear-gradient(90deg,rgba(127,90,240,0.12),rgba(0,209,178,0.06));padding:4px 8px;border-radius:8px;display:inline-block;font-family:var(--mono)}
+details summary{cursor:pointer;padding:8px 10px;border-radius:8px;background:linear-gradient(90deg,rgba(255,250,240,0.02),transparent);color:#efe7d8}
+
+.empha{font-weight:700;color:#fff;background:linear-gradient(90deg,rgba(166,124,82,0.12),rgba(122,168,116,0.06));padding:4px 8px;border-radius:8px;display:inline-block;font-family:var(--mono)}
+
 
 /* Wallet-style status */
 .wallet-row{display:flex;gap:8px;align-items:center}
-.wallet-dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(180deg,var(--accent-b),var(--accent-a));box-shadow:0 0 12px rgba(0,209,178,0.28)}
+.wallet-dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(180deg,var(--accent-b),var(--accent-a));box-shadow:0 0 8px rgba(122,168,116,0.12)}
 
 @media(max-width:600px){.container{padding:14px}.card{padding:14px}}
 
