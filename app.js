@@ -172,6 +172,13 @@ function renderPaidArea(state) {
       dt.textContent = k;
       const dd = document.createElement("dd");
       dd.textContent = v;
+      // 支払済なら支払アドレスとtxHashを強調表示
+      if (k === "支払アドレス" && v && v !== "未接続") {
+        dd.classList.add("empha");
+      }
+      if (k === "txHash" && v && v !== "未送金") {
+        dd.classList.add("empha");
+      }
       dl.appendChild(dt);
       dl.appendChild(dd);
     }
@@ -228,7 +235,7 @@ function renderPaidArea(state) {
 
     container.appendChild(title);
     container.appendChild(detail);
-    if (state.message) {
+    if (state.message && state.message !== detail.textContent) {
       const warn = document.createElement("p");
       warn.className = "muted";
       warn.textContent = state.message;

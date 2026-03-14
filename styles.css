@@ -137,3 +137,118 @@ body {
 .kv dd {
   margin: 0;
 }
+
+.empha {
+  font-weight: 700;
+  color: #0b6623;
+}
+
+/* Fluent-inspired adjustments */
+:root {
+  --fluent-accent: #0078d4;
+  --card-radius: 14px;
+  --acrylic-blur: 10px;
+  --acrylic-light: rgba(255,255,255,0.6);
+  --acrylic-dark: rgba(20,20,20,0.6);
+  --elevation-1: 0 6px 18px rgba(0,0,0,0.12);
+  --muted-color: GrayText;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --acrylic-bg: var(--acrylic-dark);
+    --muted-color: #9aa4b2;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --acrylic-bg: rgba(255,255,255,0.6);
+    --muted-color: GrayText;
+  }
+}
+
+/* Cards: translucent acrylic with gentle shadow */
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.5));
+  background-color: var(--acrylic-bg);
+  backdrop-filter: blur(var(--acrylic-blur)) saturate(120%);
+  -webkit-backdrop-filter: blur(var(--acrylic-blur)) saturate(120%);
+  box-shadow: var(--elevation-1);
+  border-radius: var(--card-radius);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* Header */
+.header h1 {
+  font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+
+/* Fluent-style buttons */
+.button {
+  background-color: var(--fluent-accent);
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, box-shadow 0.12s ease;
+}
+
+.button:hover:not([disabled]) {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+}
+
+.button:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(0,120,212,0.14);
+}
+
+.button[disabled] {
+  opacity: 0.6;
+  transform: none;
+}
+
+/* Badges */
+.badge {
+  background: rgba(255,255,255,0.06);
+  border: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: inherit;
+}
+
+/* Pre blocks */
+.pre {
+  background: rgba(0,0,0,0.03);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+/* Details summary */
+details summary {
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.03);
+  list-style: none;
+}
+
+/* Emphasis style for payer/txHash */
+.empha {
+  font-weight: 700;
+  color: var(--fluent-accent);
+  background: rgba(0,120,212,0.08);
+  padding: 2px 6px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+/* Small responsive tweaks */
+@media (max-width: 600px) {
+  .container { padding: 18px 12px 32px; }
+  .card { padding: 14px; }
+}
