@@ -21,6 +21,25 @@
 
 ---
 
+## ブロックチェーン決済（拡張仕様：デモ）
+
+疑似 402/200 の「支払い」を、**Soneium Minato（テストネット）上の送金**で実際に行えるように拡張しています。
+
+### 支払い条件
+- チェーン：Soneium Minato（testnet）
+- chainId：`1946`（`0x79a`）
+- RPC：`https://rpc.minato.soneium.org`
+- 受取先：`0xbe587b30a5514C7866b3C0EFE08e93b7c3D5BE14`
+- 金額：`0.001 ETH`
+
+### 必要なもの
+- EVMウォレット（例：MetaMask）
+- Soneium Minato のテストネットETH（送金手数料＋0.001 ETH）
+
+※本デモでは、送金後に得られる `txHash` と送金元アドレスを `localStorage` に保存し、Service Worker がRPCでTx/Receiptを検証して 402/200 を返します。
+
+---
+
 ## デモの流れ
 
 1. ユーザーが診断対象の文章を入力  
@@ -117,6 +136,26 @@
 
 - GitHub Pages は HTTPS 配信のため、本デモの Service Worker 版（疑似APIの402/200）が動作します。
 - 初回アクセス時は Service Worker のインストール・有効化に少し時間がかかるため、本デモでは「Service Worker 準備中」の間はボタンを無効化し、必要に応じて初回のみ自動リロードして安定化します。
+
+### 公開手順（最小）
+
+1. このリポジトリを GitHub に push
+2. GitHub の `Settings` → `Pages`
+3. `Build and deployment` → `Source` を `Deploy from a branch` にする
+4. `Branch` を `main`（または `master`）/ `/(root)` にして `Save`
+5. 表示される URL（例：`https://<user>.github.io/<repo>/`）へアクセス
+
+### 確認ポイント
+
+- 画面上部の `Service Worker：有効` が表示されてから「詳細リスク診断を実行」を押す
+- MetaMask などで `chainId 1946（0x79a）` のネットワークを選択（未追加の場合は追加）
+- `支払う` で 0.001 ETH を送金 → `再試行` で 200 が返ればOK
+
+### よくある問題
+
+- **更新したのに挙動が変わらない**：Service Worker のキャッシュが原因のことがあります。強制リロード（ハードリロード）や、ブラウザの「サイトデータ削除」を試してください。
+- **送金直後に 402 のまま**：Receipt がまだ確定していない可能性があります。数秒待って `再試行` してください。
+- **RPC検証に失敗**：`https://rpc.minato.soneium.org` への到達性や CORS 制限の影響があり得ます（別回線/別ブラウザでの確認も有効）。
 
 ---
 

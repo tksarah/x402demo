@@ -6,6 +6,8 @@
 
 const STORAGE_KEY = "x402demo.payment.paid.v1";
 const API_URL = new URL("./api/risk-report", window.location.href).toString();
+const STORAGE_PAYER_KEY = "x402demo.payment.payer.v1";
+const STORAGE_TXHASH_KEY = "x402demo.payment.txhash.v1";
 
 const SW_RELOAD_ONCE_KEY = "x402demo.sw.reloadedOnce.v1";
 
@@ -27,6 +29,22 @@ function setPaid(value) {
   localStorage.setItem(STORAGE_KEY, value ? "true" : "false");
 }
 
+function getPayer() {
+  return localStorage.getItem(STORAGE_PAYER_KEY) || "";
+}
+
+function setPayer(value) {
+  localStorage.setItem(STORAGE_PAYER_KEY, value || "");
+}
+
+function getTxHash() {
+  return localStorage.getItem(STORAGE_TXHASH_KEY) || "";
+}
+
+function setTxHash(value) {
+  localStorage.setItem(STORAGE_TXHASH_KEY, value || "");
+}
+
 function el(id) {
   const node = document.getElementById(id);
   if (!node) throw new Error(`Missing element: ${id}`);
@@ -40,7 +58,10 @@ function setText(id, value) {
 function updatePaymentBadge() {
   const paid = getPaid();
   const badge = el("paymentBadge");
-  badge.textContent = paid ? "支払い状態：支払い済み" : "支払い状態：未払い";
+  const tx = getTxHash();
+  badge.textContent = paid
+    ? `支払い状態：支払い済み${tx ? `（tx: ${tx.slice(0, 10)}…）` : ""}`
+    : "支払い状態：未払い";
 }
 
 function updateSwBadge() {
@@ -88,8 +109,20 @@ function renderPaidArea(state) {
     const dl = document.createElement("dl");
     dl.className = "kv";
 
+    const payment = state.payment;
+    const priceLabel = payment
+      ? `${payment.amountEth} ${payment.currency}（テストネット）`
+      : "（取得中）";
+
+    const payer = getPayer();
+    const txHash = getTxHash();
+
     const rows = [
-      ["価格", "¥200（デモ）"],
+      ["チェーン", payment ? `Soneium Minato（chainId: ${payment.chainId}）` : "-"],
+      ["価格", priceLabel],
+      ["受取先", payment ? payment.to : "-"],
+      ["支払アドレス", payer || "未接続"],
+      ["txHash", txHash || "未送金"],
       ["保存先", "localStorage"],
       ["次の操作", "支払う → 再試行"],
     ];
@@ -110,18 +143,35 @@ function renderPaidArea(state) {
     payBtn.type = "button";
     payBtn.className = "button";
     payBtn.textContent = getPaid() ? "支払い済み" : "支払う";
-    payBtn.disabled = getPaid();
-    payBtn.addEventListener("click", () => {
-      setPaid(true);
+    payBtn.disabled = getPaid() || !payment;
+    payBtn.addEventListener("click", async () => {
+      if (!payment) return;
+      payBtn.disabled = true;
+      payBtn.textContent = "支払い処理中...";
+
+      const result = await payOnChain(payment);
+      if (!result.ok) {
+        renderPaidArea({
+          mode: "payment_required",
+          payment,
+          message: result.message,
+        });
+        return;
+      }
+
+      setPayer(result.payer);
+      setTxHash(result.txHash);
       updatePaymentBadge();
-      renderPaidArea({ mode: "payment_required" });
+
+      // 送金が通ったら、すぐ検証を再試行
+      requestPaidReport();
     });
 
     const retryBtn = document.createElement("button");
     retryBtn.type = "button";
     retryBtn.className = "button";
     retryBtn.textContent = "再試行";
-    retryBtn.disabled = !getPaid();
+    retryBtn.disabled = !getTxHash() || !getPayer();
     retryBtn.addEventListener("click", () => {
       requestPaidReport();
     });
@@ -131,6 +181,12 @@ function renderPaidArea(state) {
 
     container.appendChild(title);
     container.appendChild(detail);
+    if (state.message) {
+      const warn = document.createElement("p");
+      warn.className = "muted";
+      warn.textContent = state.message;
+      container.appendChild(warn);
+    }
     container.appendChild(dl);
     container.appendChild(row);
     return;
@@ -171,6 +227,77 @@ function renderPaidArea(state) {
   throw new Error(`Unknown state.mode: ${state.mode}`);
 }
 
+function hasEthers() {
+  return typeof window !== "undefined" && typeof window.ethers !== "undefined";
+}
+
+async function payOnChain(payment) {
+  if (!hasEthers()) {
+    return { ok: false, message: "ethers.js の読み込みに失敗しました。" };
+  }
+  if (!window.ethereum) {
+    return { ok: false, message: "ウォレットが見つかりません（MetaMask等が必要です）。" };
+  }
+
+  const { ethers } = window;
+  const provider = new ethers.BrowserProvider(window.ethereum);
+
+  // アカウント接続
+  try {
+    await provider.send("eth_requestAccounts", []);
+  } catch {
+    return { ok: false, message: "ウォレット接続が拒否されました。" };
+  }
+
+  // ネットワーク確認（chainId: 1946 / 0x79a）
+  try {
+    const currentChainId = await provider.send("eth_chainId", []);
+    if ((currentChainId || "").toLowerCase() !== String(payment.chainIdHex).toLowerCase()) {
+      // 可能ならスイッチを試みる（未追加なら手動案内）
+      try {
+        await provider.send("wallet_switchEthereumChain", [
+          { chainId: payment.chainIdHex },
+        ]);
+      } catch (e) {
+        const anyErr = /** @type {any} */ (e);
+        const code = anyErr && (anyErr.code ?? anyErr.error?.code);
+        const msg = anyErr && (anyErr.message ?? anyErr.error?.message);
+
+        if (code === 4902 || String(msg || "").includes("4902")) {
+          return {
+            ok: false,
+            message:
+              "Soneium Minato がウォレットに未追加の可能性があります。ウォレットで chainId 1946（0x79a）を追加してから再実行してください。",
+          };
+        }
+        return {
+          ok: false,
+          message:
+            "ウォレットのネットワークが Soneium Minato ではありません。chainId 1946（0x79a）に切り替えてください。",
+        };
+      }
+    }
+  } catch {
+    return { ok: false, message: "ネットワーク確認に失敗しました。" };
+  }
+
+  // 送金
+  try {
+    const signer = await provider.getSigner();
+    const payer = await signer.getAddress();
+    const tx = await signer.sendTransaction({
+      to: payment.to,
+      value: ethers.parseUnits(String(payment.amountEth), "ether"),
+    });
+
+    // ここで wait() すると体感が遅くなるので、まず txHash を保存して即リトライ。
+    // ただし、receipt未確定の可能性があるので、SW側で「少し待って再試行」を返す。
+    return { ok: true, payer, txHash: tx.hash };
+  } catch {
+    return { ok: false, message: "送金トランザクションが失敗またはキャンセルされました。" };
+  }
+}
+
 async function requestPaidReport() {
   try {
     if (swStatus !== "ready") {
@@ -182,22 +309,33 @@ async function requestPaidReport() {
       return;
     }
 
+    const payer = getPayer();
+    const txHash = getTxHash();
+
     const resp = await fetch(API_URL, {
       method: "GET",
       cache: "no-store",
       headers: {
-        "X-Demo-Paid": getPaid() ? "true" : "false",
+        "X-Demo-Payer": payer,
+        "X-Demo-TxHash": txHash,
       },
     });
 
     if (resp.status === 402) {
-      renderPaidArea({ mode: "payment_required" });
+      setPaid(false);
+      updatePaymentBadge();
+      const data = await resp.json().catch(() => null);
+      const payment = data && data.payment ? data.payment : null;
+      const message = data && typeof data.message === "string" ? data.message : "";
+      renderPaidArea({ mode: "payment_required", payment, message });
       return;
     }
 
     if (resp.ok) {
       const data = await resp.json().catch(() => null);
       const report = data && typeof data.report === "string" ? data.report : "";
+      setPaid(true);
+      updatePaymentBadge();
       renderPaidArea({ mode: "ok", report });
       return;
     }
