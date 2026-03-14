@@ -1,0 +1,139 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: Canvas;
+  color: CanvasText;
+}
+
+.container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.header h1 {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+}
+
+.muted {
+  color: GrayText;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.card {
+  border: 1px solid GrayText;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid GrayText;
+  background: Field;
+  color: FieldText;
+  resize: vertical;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.button {
+  appearance: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid GrayText;
+  background: ButtonFace;
+  color: ButtonText;
+  cursor: pointer;
+}
+
+.button:focus {
+  outline: 2px solid Highlight;
+  outline-offset: 2px;
+}
+
+.button[disabled] {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid GrayText;
+}
+
+.pre {
+  margin: 10px 0 0;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid GrayText;
+  background: Field;
+  color: FieldText;
+  white-space: pre-wrap;
+  min-height: 5.5em;
+}
+
+.error {
+  margin: 10px 0 0;
+  color: CanvasText;
+}
+
+.footer {
+  margin-top: 18px;
+  font-size: 0.9rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 10px;
+  margin-top: 10px;
+}
+
+.kv dt {
+  color: GrayText;
+}
+
+.kv dd {
+  margin: 0;
+}
