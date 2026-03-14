@@ -1,0 +1,197 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Theme Comparison</title>
+
+<style>
+body {
+  font-family: sans-serif;
+  background: #f0f0f0;
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 30px;
+}
+
+.section {
+  padding: 20px;
+  border-radius: 12px;
+}
+
+/* -------------------------
+   1. Light Theme
+-------------------------- */
+.light {
+  background: #ffffff;
+  color: #111;
+  border: 1px solid #ddd;
+}
+.light .btn {
+  background: #1976d2;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+}
+
+/* -------------------------
+   2. Dark Theme
+-------------------------- */
+.dark {
+  background: #121212;
+  color: #eee;
+}
+.dark .btn {
+  background: #2962ff;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+}
+
+/* -------------------------
+   3. Monotone
+-------------------------- */
+.mono {
+  background: #f5f5f5;
+  color: #222;
+  border: 1px solid #ccc;
+}
+.mono .btn {
+  background: #444;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+}
+
+/* -------------------------
+   4. Pastel
+-------------------------- */
+.pastel {
+  background: #fafafa;
+  color: #333;
+  border-left: 8px solid #aee1f9;
+}
+.pastel .btn {
+  background: #f9d5e5;
+  color: #333;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+}
+
+/* -------------------------
+   5. Single Accent
+-------------------------- */
+.accent {
+  background: #ffffff;
+  color: #111;
+  border-left: 8px solid #00bcd4;
+}
+.accent .btn {
+  background: #00bcd4;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+}
+
+/* -------------------------
+   6. Neon / Cyberpunk
+-------------------------- */
+.neon {
+  background: #0d0d0d;
+  color: #e0e0ff;
+  border: 1px solid #333;
+}
+.neon .btn {
+  background: #8a2be2;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 0 10px #8a2be2;
+}
+
+/* -------------------------
+   7. Earth Tone
+-------------------------- */
+.earth {
+  background: #f3efe0;
+  color: #4a4a4a;
+  border-left: 8px solid #a3b18a;
+}
+.earth .btn {
+  background: #8c7a6b;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+}
+</style>
+
+</head>
+<body>
+
+<h1>見やすさ重視のカラーリング比較</h1>
+
+<div class="grid">
+
+  <div class="section light">
+    <h2>ライトテーマ</h2>
+    <p>白背景で最も読みやすい定番スタイル。</p>
+    <button class="btn">ボタン</button>
+  </div>
+
+  <div class="section dark">
+    <h2>ダークテーマ</h2>
+    <p>目の疲れを軽減し、モダンな印象。</p>
+    <button class="btn">ボタン</button>
+  </div>
+
+  <div class="section mono">
+    <h2>モノトーン</h2>
+    <p>白黒グレーで統一された洗練デザイン。</p>
+    <button class="btn">ボタン</button>
+  </div>
+
+  <div class="section pastel">
+    <h2>パステル</h2>
+    <p>柔らかく優しい色合いで心理的負担が少ない。</p>
+    <button class="btn">ボタン</button>
+  </div>
+
+  <div class="section accent">
+    <h2>アクセント1色</h2>
+    <p>白黒ベースに1色だけ強調する見やすい構成。</p>
+    <button class="btn">ボタン</button>
+  </div>
+
+  <div class="section neon">
+    <h2>ネオン / サイバーパンク</h2>
+    <p>暗い背景に鮮やかな色が映えるモダンUI。</p>
+    <button class="btn">ボタン</button>
+  </div>
+
+  <div class="section earth">
+    <h2>アースカラー</h2>
+    <p>自然を感じる落ち着いた色で長時間見ても疲れにくい。</p>
+    <button class="btn">ボタン</button>
+  </div>
+
+</div>
+
+</body>
+</html>

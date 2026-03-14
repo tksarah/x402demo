@@ -179,7 +179,7 @@ function renderPaidArea(state) {
     // 支払い情報領域の上マージンを調整しやすくするためのクラス
     detailsWrap.className = "paid-details";
     const summary = document.createElement("summary");
-    summary.textContent = "支払い情報";
+    summary.textContent = "支払先情報";
     detailsWrap.appendChild(summary);
     detailsWrap.appendChild(dl);
 
