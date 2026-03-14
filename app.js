@@ -45,6 +45,46 @@ function setTxHash(value) {
   localStorage.setItem(STORAGE_TXHASH_KEY, value || "");
 }
 
+function isLikelyAddress(value) {
+  return /^0x[0-9a-fA-F]{40}$/.test(value);
+}
+
+function isLikelyTxHash(value) {
+  return /^0x[0-9a-fA-F]{64}$/.test(value);
+}
+
+function normalizeStoredPaymentState() {
+  const paid = getPaid();
+  const payer = getPayer();
+  const txHash = getTxHash();
+
+  // 旧仕様の paid=true だけが残っている場合は詰むので、未払いへ戻す
+  if (paid && (!payer || !txHash)) {
+    setPaid(false);
+    return;
+  }
+
+  // 形式がおかしい証跡は無効扱い
+  if (payer && !isLikelyAddress(payer)) {
+    setPayer("");
+    setPaid(false);
+  }
+  if (txHash && !isLikelyTxHash(txHash)) {
+    setTxHash("");
+    setPaid(false);
+  }
+}
+
+function resetAllState() {
+  setPaid(false);
+  setPayer("");
+  setTxHash("");
+  sessionStorage.removeItem(SW_RELOAD_ONCE_KEY);
+  updatePaymentBadge();
+  setText("freeResult", "");
+  renderPaidArea({ mode: "empty" });
+}
+
 function el(id) {
   const node = document.getElementById(id);
   if (!node) throw new Error(`Missing element: ${id}`);
@@ -432,6 +472,7 @@ async function registerServiceWorker() {
 }
 
 function init() {
+  normalizeStoredPaymentState();
   updatePaymentBadge();
   setSwStatus("pending");
   renderPaidArea({ mode: "empty" });
@@ -439,6 +480,11 @@ function init() {
   registerServiceWorker();
 
   el("runDetailed").addEventListener("click", runDetailed);
+
+  const resetBtn = document.getElementById("resetState");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", resetAllState);
+  }
 
   // 入力中に古いエラーを消す
   el("inputText").addEventListener("input", () => {
