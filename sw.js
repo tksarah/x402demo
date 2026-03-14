@@ -15,33 +15,8 @@ const PRICE_WEI_DEC = "1000000000000000"; // 0.001 ETH
 const PRICE_WEI_HEX = "0x38d7ea4c68000"; // 0.001 ETH
 
 const PAID_REPORT = {
-  report: `【高精度プロジェクトリスク診断レポート】
-
-1. スケジュール遅延リスク
-   - タスク見積もりの精度が低い
-   - 依存関係の管理が不十分
-   - クリティカルパスの監視が弱い
-
-2. 要件変更リスク
-   - ステークホルダー間の合意形成が不十分
-   - 要件定義プロセスが形式化されていない
-   - 変更管理ルールが曖昧
-
-3. コミュニケーションリスク
-   - 情報共有の頻度が低い
-   - 誰が何を決めるかの責任範囲が不明確
-   - エスカレーションルートが整備されていない
-
-4. 推奨される改善アクション
-   - ① WBS の再構築と見積もり精度の向上
-   - ② 要件定義フェーズの再設計
-   - ③ 週次のリスクレビュー会議の設定
-   - ④ 変更管理プロセスの明文化
-
-5. 期待される効果
-   - スケジュール遵守率の向上
-   - 要件変更による手戻りの削減
-   - プロジェクト透明性の向上`,
+  report: `サトシ・ナカモトとは、ビットコインとブロックチェーンを創造し、世界の金融史を根底から変えたにもかかわらず、その正体を完全に隠し通した“匿名の天才”です。
+彼は2008〜2010年のわずか数年だけ姿を現し、革命を起こした後、静かに姿を消しました。`,
 };
 
 self.addEventListener("install", (event) => {
@@ -96,10 +71,35 @@ async function handleRiskReport(request) {
 
   return jsonResponse(
     {
-      const PAID_REPORT = {
-        report: `サトシ・ナカモトとは、ビットコインとブロックチェーンを創造し、世界の金融史を根底から変えたにもかかわらず、その正体を完全に隠し通した“匿名の天才”です。
-        "高精度診断レポートへのアクセスには支払いが必要です（Soneium Minato テストネット / 0.001 ETH）。",
-      };
+      ...PAID_REPORT,
+      paymentProof: {
+        chainId: CHAIN_ID_DEC,
+        payer,
+        txHash,
+      },
+    },
+    { status: 200, statusText: "OK" }
+  );
+}
+
+function buildPaymentRequest() {
+  return {
+    chain: "soneium-minato",
+    chainId: CHAIN_ID_DEC,
+    chainIdHex: CHAIN_ID_HEX,
+    rpcUrl: RPC_URL,
+    to: PAYMENT_TO,
+    amountWei: PRICE_WEI_DEC,
+    amountEth: "0.001",
+    currency: "ETH",
+  };
+}
+
+function paymentRequiredResponse() {
+  return jsonResponse(
+    {
+      error: "payment_required",
+      message: "詳細をみるには、0.001 ETH の支払いが必要です。",
       payment: buildPaymentRequest(),
       retry: { method: "GET", path: API_PATH },
     },

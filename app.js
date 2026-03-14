@@ -144,7 +144,7 @@ function renderPaidArea(state) {
 
     const detail = document.createElement("p");
     detail.className = "muted";
-    detail.textContent = "高精度診断レポートへのアクセスには支払いが必要です（疑似）。";
+    detail.textContent = "詳細をみるには、0.001 ETH の支払いが必要です。";
 
     const dl = document.createElement("dl");
     dl.className = "kv";
@@ -175,6 +175,13 @@ function renderPaidArea(state) {
       dl.appendChild(dt);
       dl.appendChild(dd);
     }
+
+    // 折りたたみ表示にする
+    const detailsWrap = document.createElement("details");
+    const summary = document.createElement("summary");
+    summary.textContent = "支払い情報（クリックで展開）";
+    detailsWrap.appendChild(summary);
+    detailsWrap.appendChild(dl);
 
     const row = document.createElement("div");
     row.className = "row";
@@ -227,7 +234,7 @@ function renderPaidArea(state) {
       warn.textContent = state.message;
       container.appendChild(warn);
     }
-    container.appendChild(dl);
+    container.appendChild(detailsWrap);
     container.appendChild(row);
     return;
   }
