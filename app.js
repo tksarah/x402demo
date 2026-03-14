@@ -139,9 +139,7 @@ function renderPaidArea(state) {
     const title = document.createElement("p");
     title.innerHTML = "<strong>HTTP 402 Payment Required</strong>";
 
-    const detail = document.createElement("p");
-    detail.className = "muted";
-    detail.textContent = "詳細を見るには、0.001 ETH の支払いが必要です。";
+      // note: the explanatory sentence about 0.001 ETH was removed per UI request
 
     const dl = document.createElement("dl");
     dl.className = "kv";
