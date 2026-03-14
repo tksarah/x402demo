@@ -68,6 +68,18 @@ body{
 .badge{display:inline-block;padding:6px 12px;border-radius:999px;background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.06);font-family:var(--mono);font-size:.95rem;color:var(--text-on-dark)}
 
 .pre{margin:10px 0 0;padding:14px;border-radius:12px;background:rgba(243,239,224,0.9);border:1px solid rgba(0,0,0,0.06);white-space:pre-wrap;min-height:5.5em;color:var(--text-on-card)}
+.pre{
+  margin:10px 0 0;
+  padding:14px;
+  border-radius:12px;
+  background:rgba(243,239,224,0.9);
+  border:1px solid rgba(0,0,0,0.06);
+  white-space:pre-wrap;
+  min-height:5.5em;
+  color:var(--text-on-card);
+  font-size:20px;
+  line-height:1.6;
+}
 .error{margin:10px 0 0;color:#9b2b2b}
 
 .footer{margin-top:18px;font-size:0.95rem;color:var(--muted);display:flex;justify-content:flex-end;gap:12px}
@@ -87,23 +99,27 @@ body{
   padding-left: 10px;
 }
 .payment-proof .proof-item strong {
+.payment-proof .proof-item strong {
   display: block;
-  color: #ffd700;
+  color: var(--accent-a);
   font-weight: 800;
   font-size: 1.08em;
-  margin-bottom: 2px;
+  margin-bottom: 6px;
 }
+
+.payment-proof .proof-value {
 .payment-proof .proof-value {
   display: block;
   font-family: var(--mono);
-  background: rgba(255,255,255,0.10);
-  color: #fff;
-  padding: 4px 10px;
-  border-radius: 7px;
-  font-size: 1.08em;
+  background: rgba(255,255,255,0.96);
+  color: var(--text-on-dark);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 1.02em;
   margin-left: 0;
   user-select: all;
   word-break: break-all;
+  border: 1px solid rgba(0,0,0,0.06);
 }
 
 

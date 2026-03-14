@@ -207,9 +207,9 @@ function renderPaidArea(state) {
     const row = document.createElement("div");
     row.className = "row";
 
-    // 支払い済みフラグが true の場合は「支払う」ボタンを表示しない
+    // 支払い済みフラグが true、または txHash が既にある場合は「支払う」ボタンを表示しない
     let payBtn = null;
-    if (!getPaid()) {
+    if (!getPaid() && !getTxHash()) {
       payBtn = document.createElement("button");
       payBtn.type = "button";
       payBtn.className = "button";
