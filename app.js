@@ -245,8 +245,23 @@ function renderPaidArea(state) {
     row.appendChild(payBtn);
     row.appendChild(retryBtn);
 
+    // txHash がある場合は、支払いプロンプトや "Txが見つかりません" を表示せず、
+    // 代わりに案内メッセージを出す
+    if (txHash) {
+      const waitMsg = document.createElement("p");
+      waitMsg.className = "muted";
+      waitMsg.textContent = 'しばらくまって”詳細を見る”を押してください。';
+      container.appendChild(waitMsg);
+      // ボタン群を先に追加し、その下に折りたたみを置く
+      container.appendChild(row);
+      container.appendChild(detailsWrap);
+      return;
+    }
+
+    // txHash がない場合は通常の支払いプロンプトを表示
     container.appendChild(title);
     container.appendChild(detail);
+
     // Receipt待ちメッセージは、payer/txHashがある場合は表示しない（代わりに支払い証跡を表示）
     const receiptWaiting = "Receiptがまだ取得できません。少し待って”詳細を見る”をお試しください。";
     if (state.message && state.message !== detail.textContent && !(state.message === receiptWaiting && (payer || txHash))) {
@@ -255,7 +270,8 @@ function renderPaidArea(state) {
       warn.textContent = state.message;
       container.appendChild(warn);
     }
-    // ボタン群を先に追加し、その下に折りたたみを置く（要求により）
+
+    // ボタン群を先に追加し、その下に折りたたみを置く
     container.appendChild(row);
     container.appendChild(detailsWrap);
     return;
