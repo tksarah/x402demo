@@ -7,7 +7,7 @@
   --accent-b:#6a8a3a; /* olive accent */
   --muted-light:#cfc3ad;
   --muted-dark:#7d6b56;
-  --text-on-dark:#efe7d8; /* page text on dark bg */
+  --text-on-dark:#ffffff; /* page text on dark bg (base font color) */
   --text-on-card:#241a12; /* card text (dark) */
   --radius:14px;
   --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Noto Sans Mono", monospace;
