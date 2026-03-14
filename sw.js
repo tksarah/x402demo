@@ -151,7 +151,7 @@ async function verifyPayment({ txHash, payer }) {
       return { ok: false, message: "Txが見つかりません（まだ伝播していない可能性があります）。" };
     }
     if (!receipt) {
-      return { ok: false, message: "Receiptがまだ取得できません。少し待って再試行してください。" };
+      return { ok: false, message: "Receiptがまだ取得できません。少し待って詳細表示をお試しください。" };
     }
     if (receipt.status !== "0x1") {
       return { ok: false, message: "Txが成功していません（status != 0x1）。" };

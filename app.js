@@ -161,8 +161,6 @@ function renderPaidArea(state) {
       ["チェーン", payment ? `Soneium Minato（chainId: ${payment.chainId}）` : "-"],
       ["価格", priceLabel],
       ["受取先", payment ? payment.to : "-"],
-      ["保存先", "localStorage"],
-      ["次の操作", "支払う → 再試行"],
     ];
 
     for (const [k, v] of rows) {
@@ -234,14 +232,14 @@ function renderPaidArea(state) {
       setTxHash(result.txHash);
       updatePaymentBadge();
 
-      // 送金が通ったら、すぐ検証を再試行
+      // 送金が通ったら、すぐ検証を行い、詳細表示を試みる
       requestPaidReport();
     });
 
     const retryBtn = document.createElement("button");
     retryBtn.type = "button";
     retryBtn.className = "button";
-    retryBtn.textContent = "再試行";
+    retryBtn.textContent = "詳細を見る";
     retryBtn.disabled = !getTxHash() || !getPayer();
     retryBtn.addEventListener("click", () => {
       requestPaidReport();
@@ -266,14 +264,10 @@ function renderPaidArea(state) {
   }
 
   if (state.mode === "ok") {
-    const title = document.createElement("p");
-    title.innerHTML = "<strong>HTTP 200 OK</strong>";
-
     const pre = document.createElement("pre");
     pre.className = "pre";
     pre.textContent = state.report || "";
 
-    container.appendChild(title);
     container.appendChild(pre);
     return;
   }
