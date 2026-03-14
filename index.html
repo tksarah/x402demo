@@ -3,15 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>x402 疑似版 | 高精度AIプロジェクトリスク診断デモ</title>
+    <title>x402 デモ</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <main class="container">
       <header class="header">
-        <h1>高精度AIプロジェクトリスク診断デモ（x402 疑似版）</h1>
+        <h1>x402 デモ</h1>
         <p class="muted">
-          ブラウザのみで「402 Payment Required → 支払い → 再試行で200 OK」を疑似的に体験できます。
+          「支払いが必要な情報アクセス」をブロックチェーン決済で体験できるデモです。
         </p>
         <p>
           <span id="paymentBadge" class="badge" aria-live="polite"></span>
@@ -24,35 +24,25 @@
       </header>
 
       <section class="card" aria-labelledby="inputTitle">
-        <h2 id="inputTitle">診断対象の文章</h2>
-        <p class="muted">
-          例：新規システム開発で、要件が固まらないままスケジュールだけが先行している。
-        </p>
-        <label class="sr-only" for="inputText">診断対象の文章</label>
-        <textarea
-          id="inputText"
-          class="textarea"
-          rows="6"
-          placeholder="ここに文章を入力..."
-        ></textarea>
-
+        <h2 id="inputTitle">問題</h2>
+        <p class="muted">ブロックチェーンの生みの親とされているのは何者か？</p>
         <div class="row">
           <button id="runDetailed" class="button" type="button">
-            詳細リスク診断を実行
+            回答を見る
           </button>
         </div>
         <p id="inputError" class="error" role="status" aria-live="polite"></p>
       </section>
 
-      <section class="grid" aria-label="診断結果">
+      <section class="grid" aria-label="回答">
         <div class="card" aria-labelledby="freeTitle">
-          <h2 id="freeTitle">無料版（簡易診断）</h2>
+          <h2 id="freeTitle">回答</h2>
           <p class="muted">ボタン押下後に表示されます。</p>
           <pre id="freeResult" class="pre" aria-live="polite"></pre>
         </div>
 
         <div class="card" aria-labelledby="paidTitle">
-          <h2 id="paidTitle">有料版（高精度診断）</h2>
+          <h2 id="paidTitle">回答の詳細（支払い後）</h2>
           <div id="paidArea" aria-live="polite"></div>
         </div>
       </section>

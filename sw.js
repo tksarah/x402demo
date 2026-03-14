@@ -96,36 +96,10 @@ async function handleRiskReport(request) {
 
   return jsonResponse(
     {
-      ...PAID_REPORT,
-      paymentProof: {
-        chainId: CHAIN_ID_DEC,
-        payer,
-        txHash,
-      },
-    },
-    { status: 200, statusText: "OK" }
-  );
-}
-
-function buildPaymentRequest() {
-  return {
-    chain: "soneium-minato",
-    chainId: CHAIN_ID_DEC,
-    chainIdHex: CHAIN_ID_HEX,
-    rpcUrl: RPC_URL,
-    to: PAYMENT_TO,
-    amountWei: PRICE_WEI_DEC,
-    amountEth: "0.001",
-    currency: "ETH",
-  };
-}
-
-function paymentRequiredResponse() {
-  return jsonResponse(
-    {
-      error: "payment_required",
-      message:
+      const PAID_REPORT = {
+        report: `サトシ・ナカモトとは、ビットコインとブロックチェーンを創造し、世界の金融史を根底から変えたにもかかわらず、その正体を完全に隠し通した“匿名の天才”です。
         "高精度診断レポートへのアクセスには支払いが必要です（Soneium Minato テストネット / 0.001 ETH）。",
+      };
       payment: buildPaymentRequest(),
       retry: { method: "GET", path: API_PATH },
     },

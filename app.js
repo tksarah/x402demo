@@ -14,10 +14,10 @@ const SW_RELOAD_ONCE_KEY = "x402demo.sw.reloadedOnce.v1";
 /** @type {"pending"|"ready"|"unavailable"} */
 let swStatus = "pending";
 
-const FREE_REPORT = `【簡易診断】
-プロジェクトにリスクがあります。改善が必要です。`;
+const FREE_REPORT = `サトシ・ナカモト`;
 
-const PAID_REPORT_FALLBACK = `【高精度プロジェクトリスク診断レポート】
+const PAID_REPORT_FALLBACK = `サトシ・ナカモトとは、ビットコインとブロックチェーンを創造し、世界の金融史を根底から変えたにもかかわらず、その正体を完全に隠し通した“匿名の天才”です。
+彼は2008〜2010年のわずか数年だけ姿を現し、革命を起こした後、静かに姿を消しました。
 
 （Service Worker からの応答が取得できないため、フォールバック表示しています。）`;
 
@@ -392,23 +392,10 @@ async function requestPaidReport() {
   }
 }
 
-function validateInput(text) {
-  if (!text || text.trim().length === 0) {
-    return "文章を入力してください。";
-  }
-  return "";
-}
-
 function runDetailed() {
-  const text = el("inputText").value;
-  const error = validateInput(text);
-  setText("inputError", error);
-  if (error) return;
-
-  // 無料版の簡易診断は、詳細診断を試みたタイミングで表示する
+  // 回答はボタン押下で表示
   setText("freeResult", FREE_REPORT);
-
-  // 有料版は、Service Worker の疑似 API を叩いて 402 / 200 を取得
+  // 詳細は支払い後のみ
   requestPaidReport();
 }
 
