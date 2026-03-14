@@ -131,10 +131,7 @@ function renderPaidArea(state) {
   container.innerHTML = "";
 
   if (state.mode === "empty") {
-    const p = document.createElement("p");
-    p.className = "muted";
-    p.textContent = "ボタン押下後に表示されます。";
-    container.appendChild(p);
+    // 空状態では何も表示しない（以前の案内文を削除）
     return;
   }
 
@@ -251,7 +248,7 @@ function renderPaidArea(state) {
     container.appendChild(title);
     container.appendChild(detail);
     // Receipt待ちメッセージは、payer/txHashがある場合は表示しない（代わりに支払い証跡を表示）
-    const receiptWaiting = "Receiptがまだ取得できません。少し待って再試行してください。";
+    const receiptWaiting = "Receiptがまだ取得できません。少し待って『詳細を見る』を押してください。";
     if (state.message && state.message !== detail.textContent && !(state.message === receiptWaiting && (payer || txHash))) {
       const warn = document.createElement("p");
       warn.className = "muted";
@@ -358,7 +355,7 @@ async function payOnChain(payment) {
     });
 
     // ここで wait() すると体感が遅くなるので、まず txHash を保存して即リトライ。
-    // ただし、receipt未確定の可能性があるので、SW側で「少し待って再試行」を返す。
+    // ただし、receipt未確定の可能性があるので、SW側で「少し待って『詳細を見る' を返す。
     return { ok: true, payer, txHash: tx.hash };
   } catch {
     return { ok: false, message: "送金トランザクションが失敗またはキャンセルされました。" };
