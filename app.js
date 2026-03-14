@@ -188,16 +188,18 @@ function renderPaidArea(state) {
       const proofWrap = document.createElement("div");
       proofWrap.className = "payment-proof";
 
-      if (payer) {
-        const pEl = document.createElement("div");
-        pEl.innerHTML = `<strong>支払アドレス:</strong> <span class=\"empha\">${payer}</span>`;
-        proofWrap.appendChild(pEl);
-      }
-      if (txHash) {
-        const tEl = document.createElement("div");
-        tEl.innerHTML = `<strong>TxHash:</strong> <span class=\"empha\">${txHash}</span>`;
-        proofWrap.appendChild(tEl);
-      }
+         if (payer) {
+           const pEl = document.createElement("div");
+           pEl.className = "proof-item";
+           pEl.innerHTML = `<strong>支払アドレス:</strong> <span class="empha">${payer}</span>`;
+           proofWrap.appendChild(pEl);
+         }
+         if (txHash) {
+           const tEl = document.createElement("div");
+           tEl.className = "proof-item";
+           tEl.innerHTML = `<strong>TxHash:</strong> <span class="empha">${txHash}</span>`;
+           proofWrap.appendChild(tEl);
+         }
       // 表示を先に追加して目立たせる
       container.appendChild(proofWrap);
     }
