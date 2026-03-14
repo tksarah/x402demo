@@ -141,7 +141,7 @@ function renderPaidArea(state) {
 
     const detail = document.createElement("p");
     detail.className = "muted";
-    detail.textContent = "詳細をみるには、0.001 ETH の支払いが必要です。";
+    detail.textContent = "詳細を見るには、0.001 ETH の支払いが必要です。";
 
     const dl = document.createElement("dl");
     dl.className = "kv";
@@ -178,6 +178,8 @@ function renderPaidArea(state) {
 
     // 折りたたみ表示にする（支払アドレス/txHashは展開情報として別表示）
     const detailsWrap = document.createElement("details");
+    // 支払い情報領域の上マージンを調整しやすくするためのクラス
+    detailsWrap.className = "paid-details";
     const summary = document.createElement("summary");
     summary.textContent = "支払い情報";
     detailsWrap.appendChild(summary);
