@@ -248,7 +248,7 @@ function renderPaidArea(state) {
     container.appendChild(title);
     container.appendChild(detail);
     // Receipt待ちメッセージは、payer/txHashがある場合は表示しない（代わりに支払い証跡を表示）
-    const receiptWaiting = "Receiptがまだ取得できません。少し待って『詳細を見る』を押してください。";
+    const receiptWaiting = "Receiptがまだ取得できません。少し待って”詳細を見る”をお試しください。";
     if (state.message && state.message !== detail.textContent && !(state.message === receiptWaiting && (payer || txHash))) {
       const warn = document.createElement("p");
       warn.className = "muted";
