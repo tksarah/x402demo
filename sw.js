@@ -99,7 +99,7 @@ function paymentRequiredResponse() {
   return jsonResponse(
     {
       error: "payment_required",
-      message: "詳細をみるには、0.001 ETH の支払いが必要です。",
+      message: "詳細を見るには、0.001 ETH の支払いが必要です。",
       payment: buildPaymentRequest(),
       retry: { method: "GET", path: API_PATH },
     },
