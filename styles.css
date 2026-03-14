@@ -143,68 +143,68 @@ body {
   color: #0b6623;
 }
 
-/* Fluent-inspired adjustments */
+/* Glassmorphism styles */
 :root {
-  --fluent-accent: #0078d4;
-  --card-radius: 14px;
-  --acrylic-blur: 10px;
-  --acrylic-light: rgba(255,255,255,0.6);
-  --acrylic-dark: rgba(20,20,20,0.6);
-  --elevation-1: 0 6px 18px rgba(0,0,0,0.12);
-  --muted-color: GrayText;
+  --glass-accent: #6fb3f2;
+  --glass-accent-strong: #4a90e2;
+  --glass-radius: 16px;
+  --glass-blur: 12px;
+  --glass-bg-light: rgba(255,255,255,0.18);
+  --glass-bg-dark: rgba(20,20,20,0.22);
+  --glass-border: rgba(255,255,255,0.25);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --acrylic-bg: var(--acrylic-dark);
-    --muted-color: #9aa4b2;
+    --glass-bg: var(--glass-bg-dark);
+    --glass-border: rgba(255,255,255,0.06);
   }
 }
 
 @media (prefers-color-scheme: light) {
   :root {
-    --acrylic-bg: rgba(255,255,255,0.6);
-    --muted-color: GrayText;
+    --glass-bg: var(--glass-bg-light);
+    --glass-border: rgba(255,255,255,0.45);
   }
 }
 
-/* Cards: translucent acrylic with gentle shadow */
+/* Glass card */
 .card {
-  background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.5));
-  background-color: var(--acrylic-bg);
-  backdrop-filter: blur(var(--acrylic-blur)) saturate(120%);
-  -webkit-backdrop-filter: blur(var(--acrylic-blur)) saturate(120%);
-  box-shadow: var(--elevation-1);
-  border-radius: var(--card-radius);
-  border: 1px solid rgba(0,0,0,0.06);
+  background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: 0 8px 30px rgba(15,23,42,0.18);
+  backdrop-filter: blur(var(--glass-blur)) saturate(120%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(120%);
 }
 
-/* Header */
+/* Header styling */
 .header h1 {
   font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial;
-  font-weight: 600;
-  letter-spacing: -0.2px;
+  font-weight: 700;
+  color: CanvasText;
 }
 
-/* Fluent-style buttons */
+/* Glass buttons */
 .button {
-  background-color: var(--fluent-accent);
-  color: #fff;
-  border: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06));
+  border: 1px solid rgba(255,255,255,0.22);
+  color: #062c54;
   padding: 10px 14px;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-  transition: transform 0.12s ease, box-shadow 0.12s ease, box-shadow 0.12s ease;
+  border-radius: 12px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  backdrop-filter: blur(4px);
 }
 
 .button:hover:not([disabled]) {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px rgba(10,20,40,0.12);
 }
 
 .button:focus {
   outline: none;
-  box-shadow: 0 0 0 4px rgba(0,120,212,0.14);
+  box-shadow: 0 0 0 6px rgba(79,161,231,0.12);
 }
 
 .button[disabled] {
@@ -214,18 +214,26 @@ body {
 
 /* Badges */
 .badge {
-  background: rgba(255,255,255,0.06);
-  border: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.08);
   padding: 6px 12px;
   border-radius: 999px;
-  color: inherit;
 }
 
 /* Pre blocks */
 .pre {
-  background: rgba(0,0,0,0.03);
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
   border-radius: 12px;
   padding: 14px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+.payment-proof {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(111,179,242,0.06), rgba(74,144,226,0.03));
+  border: 1px solid rgba(74,144,226,0.08);
 }
 
 /* Details summary */
@@ -233,17 +241,16 @@ details summary {
   cursor: pointer;
   padding: 8px 10px;
   border-radius: 8px;
-  background: rgba(0,0,0,0.03);
-  list-style: none;
+  background: rgba(255,255,255,0.02);
 }
 
 /* Emphasis style for payer/txHash */
 .empha {
   font-weight: 700;
-  color: var(--fluent-accent);
-  background: rgba(0,120,212,0.08);
-  padding: 2px 6px;
-  border-radius: 6px;
+  color: var(--glass-accent-strong);
+  background: linear-gradient(90deg, rgba(111,179,242,0.12), rgba(74,144,226,0.06));
+  padding: 4px 8px;
+  border-radius: 8px;
   display: inline-block;
 }
 

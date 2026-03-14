@@ -161,8 +161,6 @@ function renderPaidArea(state) {
       ["チェーン", payment ? `Soneium Minato（chainId: ${payment.chainId}）` : "-"],
       ["価格", priceLabel],
       ["受取先", payment ? payment.to : "-"],
-      ["支払アドレス", payer || "未接続"],
-      ["txHash", txHash || "未送金"],
       ["保存先", "localStorage"],
       ["次の操作", "支払う → 再試行"],
     ];
@@ -183,12 +181,31 @@ function renderPaidArea(state) {
       dl.appendChild(dd);
     }
 
-    // 折りたたみ表示にする
+    // 折りたたみ表示にする（支払アドレス/txHashは展開情報として別表示）
     const detailsWrap = document.createElement("details");
     const summary = document.createElement("summary");
     summary.textContent = "支払い情報（クリックで展開）";
     detailsWrap.appendChild(summary);
     detailsWrap.appendChild(dl);
+
+    // 支払い済み（または送金済み）の場合は、payer/txHash を折りたたみ外で強調表示する
+    if (payer || txHash) {
+      const proofWrap = document.createElement("div");
+      proofWrap.className = "payment-proof";
+
+      if (payer) {
+        const pEl = document.createElement("div");
+        pEl.innerHTML = `<strong>支払アドレス:</strong> <span class=\"empha\">${payer}</span>`;
+        proofWrap.appendChild(pEl);
+      }
+      if (txHash) {
+        const tEl = document.createElement("div");
+        tEl.innerHTML = `<strong>TxHash:</strong> <span class=\"empha\">${txHash}</span>`;
+        proofWrap.appendChild(tEl);
+      }
+      // 表示を先に追加して目立たせる
+      container.appendChild(proofWrap);
+    }
 
     const row = document.createElement("div");
     row.className = "row";
@@ -235,7 +252,9 @@ function renderPaidArea(state) {
 
     container.appendChild(title);
     container.appendChild(detail);
-    if (state.message && state.message !== detail.textContent) {
+    // Receipt待ちメッセージは、payer/txHashがある場合は表示しない（代わりに支払い証跡を表示）
+    const receiptWaiting = "Receiptがまだ取得できません。少し待って再試行してください。";
+    if (state.message && state.message !== detail.textContent && !(state.message === receiptWaiting && (payer || txHash))) {
       const warn = document.createElement("p");
       warn.className = "muted";
       warn.textContent = state.message;
