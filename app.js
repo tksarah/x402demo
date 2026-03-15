@@ -104,6 +104,58 @@ function updatePaymentBadge() {
     : "支払い状態：未払い";
 }
 
+// -------------------------
+// x402 progress UI helpers
+// -------------------------
+const X402_STEPS = [
+  "リクエスト",
+  "支払い要求",
+  "支払い中",
+  "検証",
+  "トークン発行",
+  "詳細表示",
+];
+
+function initProgress() {
+  const wrap = document.getElementById("x402-progress");
+  if (!wrap) return;
+  // Ensure labels match (in case HTML changed); keep existing nodes if present
+  const nodes = wrap.querySelectorAll(".step");
+  if (nodes.length === X402_STEPS.length) return;
+  wrap.innerHTML = "";
+  for (let i = 0; i < X402_STEPS.length; i++) {
+    const s = document.createElement("div");
+    s.className = "step";
+    s.dataset.step = String(i);
+    s.textContent = X402_STEPS[i];
+    wrap.appendChild(s);
+  }
+}
+
+function setProgress(stepIndex) {
+  const wrap = document.getElementById("x402-progress");
+  if (!wrap) return;
+  const steps = Array.from(wrap.querySelectorAll(".step"));
+  steps.forEach((el, idx) => {
+    el.classList.toggle("active", idx === stepIndex);
+    el.classList.toggle("completed", idx < stepIndex);
+  });
+}
+
+function syncProgressWithState() {
+  // Decide initial step based on stored payment state
+  if (getPaid()) {
+    setProgress(5);
+    return;
+  }
+  if (getTxHash()) {
+    // sent but not confirmed: verification
+    setProgress(3);
+    return;
+  }
+  // default idle/request state
+  setProgress(0);
+
 function updateSwBadge() {
   const badge = el("swBadge");
   if (swStatus === "ready") {
@@ -220,6 +272,8 @@ function renderPaidArea(state) {
         payBtn.disabled = true;
         payBtn.textContent = "支払い処理中...";
 
+        // mark as paying while wallet interaction occurs
+        setProgress(2);
         const result = await payOnChain(payment);
         if (!result.ok) {
           renderPaidArea({
@@ -247,6 +301,8 @@ function renderPaidArea(state) {
     retryBtn.addEventListener("click", () => {
       requestPaidReport();
     });
+            // reflect progress: payment is required
+            setProgress(1);
 
     if (payBtn) row.appendChild(payBtn);
     row.appendChild(retryBtn);
@@ -273,6 +329,8 @@ function renderPaidArea(state) {
       const warn = document.createElement("p");
       warn.className = "muted";
       warn.textContent = state.message;
+          // txHash がある段階は検証中
+          setProgress(3);
       container.appendChild(warn);
     }
 
@@ -387,6 +445,8 @@ async function payOnChain(payment) {
 async function requestPaidReport() {
   try {
     if (swStatus !== "ready") {
+      // still in request phase
+      setProgress(0);
       renderPaidArea({
         mode: "unavailable",
         message:
@@ -410,6 +470,8 @@ async function requestPaidReport() {
     if (resp.status === 402) {
       setPaid(false);
       updatePaymentBadge();
+      // payment required -> step
+      setProgress(1);
       const data = await resp.json().catch(() => null);
       const payment = data && data.payment ? data.payment : null;
       const message = data && typeof data.message === "string" ? data.message : "";
@@ -422,6 +484,8 @@ async function requestPaidReport() {
       const report = data && typeof data.report === "string" ? data.report : "";
       setPaid(true);
       updatePaymentBadge();
+      // token issued / ok -> mark progress complete
+      setProgress(5);
       renderPaidArea({ mode: "ok", report });
       return;
     }
@@ -509,6 +573,9 @@ function init() {
   updatePaymentBadge();
   setSwStatus("pending");
   renderPaidArea({ mode: "empty" });
+  // initialize progress UI
+  initProgress();
+  syncProgressWithState();
 
   registerServiceWorker();
 
@@ -519,10 +586,13 @@ function init() {
     resetBtn.addEventListener("click", resetAllState);
   }
 
-  // 入力中に古いエラーを消す
-  el("inputText").addEventListener("input", () => {
-    setText("inputError", "");
-  });
+  // 入力中に古いエラーを消す（入力要素があれば）
+  const maybeInput = document.getElementById("inputText");
+  if (maybeInput) {
+    maybeInput.addEventListener("input", () => {
+      setText("inputError", "");
+    });
+  }
 }
 
 init();
