@@ -8,11 +8,15 @@ const STORAGE_KEY = "x402demo.payment.paid.v1";
 const API_URL = new URL("./api/risk-report", window.location.href).toString();
 const STORAGE_PAYER_KEY = "x402demo.payment.payer.v1";
 const STORAGE_TXHASH_KEY = "x402demo.payment.txhash.v1";
+const STORAGE_PAYMENT_INFO_KEY = "x402demo.payment.info.v1";
 
 const SW_RELOAD_ONCE_KEY = "x402demo.sw.reloadedOnce.v1";
 
 /** @type {"pending"|"ready"|"unavailable"} */
 let swStatus = "pending";
+let verificationPollId = null;
+let finalAnimationRunning = false;
+let finalAnimationDone = false;
 
 const FREE_REPORT = `サトシ・ナカモト`;
 
@@ -43,6 +47,22 @@ function getTxHash() {
 
 function setTxHash(value) {
   localStorage.setItem(STORAGE_TXHASH_KEY, value || "");
+}
+
+function setStoredPaymentInfo(obj) {
+  try {
+    if (!obj) return localStorage.removeItem(STORAGE_PAYMENT_INFO_KEY);
+    localStorage.setItem(STORAGE_PAYMENT_INFO_KEY, JSON.stringify(obj));
+  } catch (e) {}
+}
+
+function getStoredPaymentInfo() {
+  try {
+    const v = localStorage.getItem(STORAGE_PAYMENT_INFO_KEY);
+    return v ? JSON.parse(v) : null;
+  } catch (e) {
+    return null;
+  }
 }
 
 function isLikelyAddress(value) {
@@ -85,6 +105,25 @@ function resetAllState() {
   renderPaidArea({ mode: "empty" });
 }
 
+function resetAllStateAndHardReload() {
+  // Clear demo state first
+  resetAllState();
+
+  // Small delay to ensure storage writes are flushed, then force a network reload
+  setTimeout(() => {
+    try {
+      const url = new URL(location.href);
+      // Add a cache-busting query param so the browser fetches fresh resources
+      url.searchParams.set("_reload", Date.now());
+      // Use replace so history isn't polluted
+      location.replace(url.toString());
+    } catch (e) {
+      // Fallback to a plain reload if URL manipulation fails
+      location.reload();
+    }
+  }, 50);
+}
+
 function el(id) {
   const node = document.getElementById(id);
   if (!node) throw new Error(`Missing element: ${id}`);
@@ -110,10 +149,10 @@ function updatePaymentBadge() {
 const X402_STEPS = [
   "リクエスト",
   "支払い要求",
-  "支払い中",
-  "検証",
-  "レシート発行",
-  "詳細表示",
+  "<span class=\"two-line\">支払データ<br>署名付き作成</span>",
+  "有効性検証",
+  "支払い",
+  "コンテンツ提供",
 ];
 
 function initProgress() {
@@ -126,7 +165,7 @@ function initProgress() {
     const s = document.createElement("div");
     s.className = "step";
     s.dataset.step = String(i);
-    s.textContent = X402_STEPS[i];
+    s.innerHTML = X402_STEPS[i];
     wrap.appendChild(s);
   }
 }
@@ -139,6 +178,135 @@ function setProgress(stepIndex) {
     el.classList.toggle("active", idx === stepIndex);
     el.classList.toggle("completed", idx < stepIndex);
   });
+  // Update explanatory text corresponding to current step
+  try {
+    renderProgressExplanation(stepIndex);
+  } catch (e) {
+    // no-op if explanation element is missing
+  }
+}
+
+/**
+ * Render human-readable explanation for the given progress step.
+ * Currently implements the initial requested message for step 1.
+ */
+function renderProgressExplanation(stepIndex) {
+  const elExp = document.getElementById("x402-explanation");
+  if (!elExp) return;
+  // 初回アクセス時のプレースホルダ表示
+  if (stepIndex === 0) {
+    elExp.innerHTML = '<p class="muted small">（ここに進捗の説明が入ります。）</p>';
+    return;
+  }
+  // Build a cumulative ordered list of explanations for each stage
+  const items = [];
+
+  // 1
+  items.push('クライアントはコンテンツ提供サーバーへコンテンツ提供の要求');
+
+  // 2-4 (支払データ署名付き作成)
+  if (stepIndex >= 2) {
+    items.push('コンテンツ提供サーバーは支払い条件（金額等）をクライアントへ提示');
+    items.push('クライアントは“支払データ、署名付き”の作成（この時点では支払いは完了していない）');
+    items.push('クライアントは3を付けてコンテンツ提供サーバーへ再要求');
+  }
+
+  // 5-7 (有効性検証)
+  if (stepIndex >= 3) {
+    items.push('コンテンツ提供サーバーは受け取った3の検証依頼をファシリテータへ行う');
+    items.push('ファシリテーターは検証の結果をコンテンツ提供サーバーへ返答');
+    items.push('コンテンツ提供サーバーは検証結果が“有効”の時、コンテンツの提供準備を開始し、ファシリテーターに決済処理を依頼');
+  }
+
+  // 8-9 (支払い)
+  if (stepIndex >= 4) {
+    items.push('ファシリテータはブロックチェーンに決済の取引を送信');
+    items.push('ブロックチェーンは取引を確定し、ファシリテーターに応答');
+  }
+
+  // 10-11 (コンテンツ提供)
+  if (stepIndex >= 5) {
+    items.push('ファシリテーターは決済の完了をコンテンツ提供サーバーへ通知');
+    items.push('コンテンツ提供サーバーは10の通知を受けて、クライアントにコンテンツを提供');
+  }
+
+  // Render as an ordered list, keeping output visible for later steps
+  const html = ['<ol class="x402-steps">'];
+  for (const it of items) {
+    if (typeof it === 'string') {
+      html.push(`<li>${it}</li>`);
+    } else {
+      html.push(`<li>${it.text}<div class="sub">${it.sub}</div></li>`);
+    }
+  }
+  html.push('</ol>');
+  elExp.innerHTML = html.join('');
+  // end renderProgressExplanation
+}
+
+function animateFinalSteps() {
+  return new Promise((resolve) => {
+    if (finalAnimationDone) {
+      // already finished previously — ensure final progress is set
+      setProgress(5);
+      return resolve();
+    }
+    if (finalAnimationRunning) return resolve();
+    finalAnimationRunning = true;
+    const step4 = document.querySelector('.x402-progress .step[data-step="4"]');
+    const step5 = document.querySelector('.x402-progress .step[data-step="5"]');
+    if (!step4 || !step5) return resolve();
+
+    // ensure initial state
+    step4.classList.remove('anim-highlight');
+    step5.classList.remove('anim-highlight');
+
+    // highlight step4 for 1s, then step5 for 1s, then mark completed and set final progress
+    step4.classList.add('anim-highlight');
+    // ensure explanation updates when step4 (支払い) is highlighted
+    try { renderProgressExplanation(4); } catch (e) {}
+    setTimeout(() => {
+      step4.classList.remove('anim-highlight');
+      step4.classList.add('completed');
+
+      step5.classList.add('anim-highlight');
+      // update explanation when step5 (コンテンツ提供) is highlighted
+      try { renderProgressExplanation(5); } catch (e) {}
+      setTimeout(() => {
+        step5.classList.remove('anim-highlight');
+        step5.classList.add('completed');
+        setProgress(5);
+        finalAnimationRunning = false;
+        finalAnimationDone = true;
+        resolve();
+      }, 1000);
+    }, 1000);
+  });
+}
+
+function startVerificationPoll(intervalMs = 3000) {
+  if (verificationPollId) return;
+  // immediately try once, then schedule
+  (async () => {
+    await requestPaidReport().catch(() => {});
+  })();
+  verificationPollId = setInterval(async () => {
+    try {
+      if (getPaid() || !getTxHash()) {
+        stopVerificationPoll();
+        return;
+      }
+      await requestPaidReport();
+    } catch (e) {
+      // ignore transient errors
+    }
+  }, intervalMs);
+}
+
+function stopVerificationPoll() {
+  if (!verificationPollId) return;
+  clearInterval(verificationPollId);
+  verificationPollId = null;
 }
 
 function syncProgressWithState() {
@@ -155,12 +323,16 @@ function syncProgressWithState() {
 
 function updateSwBadge() {
   const badge = el("swBadge");
+  // reset classes
+  badge.classList.remove("sw-ready", "sw-unavailable");
   if (swStatus === "ready") {
     badge.textContent = "Service Worker：有効";
+    badge.classList.add("sw-ready");
     return;
   }
   if (swStatus === "unavailable") {
     badge.textContent = "Service Worker：無効";
+    badge.classList.add("sw-unavailable");
     return;
   }
   badge.textContent = "Service Worker：準備中";
@@ -203,6 +375,9 @@ function renderPaidArea(state) {
     const payer = getPayer();
     const txHash = getTxHash();
 
+    // persist received payment info so we can show it later (final screen)
+    if (payment) setStoredPaymentInfo(payment);
+
     const rows = [
       ["チェーン", payment ? `Soneium Minato（chainId: ${payment.chainId}）` : "-"],
       ["価格", priceLabel],
@@ -234,6 +409,8 @@ function renderPaidArea(state) {
     detailsWrap.appendChild(summary);
     detailsWrap.appendChild(dl);
 
+    // detailsWrap will be used as the collapsible (folded) payment info
+
     // 支払い済み（または送金済み）の場合は、payer/txHash を折りたたみ外で強調表示する
     if (payer || txHash) {
       const proofWrap = document.createElement("div");
@@ -264,12 +441,12 @@ function renderPaidArea(state) {
       payBtn = document.createElement("button");
       payBtn.type = "button";
       payBtn.className = "button";
-      payBtn.textContent = "支払う";
+      payBtn.textContent = "コンテンツの要求（支払要求）";
       payBtn.disabled = !payment;
       payBtn.addEventListener("click", async () => {
         if (!payment) return;
         payBtn.disabled = true;
-        payBtn.textContent = "支払い処理中...";
+        payBtn.textContent = "コンテンツ要求中...";
 
         // indicate wallet interaction
         setProgress(2);
@@ -292,29 +469,17 @@ function renderPaidArea(state) {
         setProgress(3);
         // 送金が通ったら、すぐ検証を行い、詳細表示を試みる
         requestPaidReport();
+        // さらに、検証がすぐ通らない場合に備えてポーリング開始
+        startVerificationPoll(3000);
       });
     }
 
-    const retryBtn = document.createElement("button");
-    retryBtn.type = "button";
-    retryBtn.className = "button";
-    retryBtn.textContent = "詳細を見る";
-    retryBtn.disabled = !getTxHash() || !getPayer();
-    retryBtn.addEventListener("click", () => {
-      requestPaidReport();
-    });
-
     if (payBtn) row.appendChild(payBtn);
-    row.appendChild(retryBtn);
 
     // txHash がある場合は、支払いプロンプトや "Txが見つかりません" を表示せず、
     // 代わりに案内メッセージを出す
     if (txHash) {
-      const waitMsg = document.createElement("p");
-      waitMsg.className = "muted";
-      waitMsg.textContent = 'しばらくまって”詳細を見る”を押してください。';
-      container.appendChild(waitMsg);
-      // ボタン群を先に追加し、その下に折りたたみを置く
+      // ボタン群を先に追加し、支払先情報はカード内で折りたたみ表示
       container.appendChild(row);
       container.appendChild(detailsWrap);
       // tx がある段階は検証中
@@ -326,7 +491,7 @@ function renderPaidArea(state) {
     container.appendChild(title);
 
     // Receipt待ちメッセージは、payer/txHashがある場合は表示しない（代わりに支払い証跡を表示）
-    const receiptWaiting = "Receiptがまだ取得できません。少し待って”詳細を見る”をお試しください。";
+    const receiptWaiting = "Receiptがまだ取得できません。しばらくお待ちください。";
     if (state.message && !(state.message === receiptWaiting && (payer || txHash))) {
       const warn = document.createElement("p");
       warn.className = "muted";
@@ -334,7 +499,7 @@ function renderPaidArea(state) {
       container.appendChild(warn);
     }
 
-    // ボタン群を先に追加し、その下に折りたたみを置く
+    // ボタン群を先に追加し、支払先情報はカード内で折りたたみ表示
     container.appendChild(row);
     container.appendChild(detailsWrap);
     return;
@@ -348,6 +513,54 @@ function renderPaidArea(state) {
     pre.textContent = state.report || "";
 
     container.appendChild(pre);
+    // Ensure payment details / proof remain visible on final screen
+    const storedPayment = getStoredPaymentInfo();
+    const payer = getPayer();
+    const txHash = getTxHash();
+
+    if (payer || txHash) {
+      const proofWrap = document.createElement("div");
+      proofWrap.className = "payment-proof";
+      if (payer) {
+        const pEl = document.createElement("div");
+        pEl.className = "proof-item";
+        pEl.innerHTML = `<strong>支払アドレス：</strong><br><span class="empha proof-value">${payer}</span>`;
+        proofWrap.appendChild(pEl);
+      }
+      if (txHash) {
+        const tEl = document.createElement("div");
+        tEl.className = "proof-item";
+        tEl.innerHTML = `<strong>TxHash：</strong><br><span class="empha proof-value">${txHash}</span>`;
+        proofWrap.appendChild(tEl);
+      }
+      container.appendChild(proofWrap);
+    }
+
+    if (storedPayment) {
+      const dl = document.createElement("dl");
+      dl.className = "kv";
+      const rows = [
+        ["チェーン", storedPayment.chainId ? `Soneium Minato（chainId: ${storedPayment.chainId}）` : "-"],
+        ["価格", storedPayment.amountEth ? `${storedPayment.amountEth} ${storedPayment.currency}（テストネット）` : "-"],
+        ["受取先", storedPayment.to || "-"],
+      ];
+      for (const [k, v] of rows) {
+        const dt = document.createElement("dt");
+        dt.textContent = k;
+        const dd = document.createElement("dd");
+        dd.textContent = v;
+        dl.appendChild(dt);
+        dl.appendChild(dd);
+      }
+      const detailsWrap = document.createElement("details");
+      detailsWrap.className = "paid-details";
+      const summary = document.createElement("summary");
+      summary.textContent = "支払先情報";
+      detailsWrap.appendChild(summary);
+      detailsWrap.appendChild(dl);
+      container.appendChild(detailsWrap);
+    }
+
     return;
   }
 
@@ -485,7 +698,19 @@ async function requestPaidReport() {
       const report = data && typeof data.report === "string" ? data.report : "";
       setPaid(true);
       updatePaymentBadge();
-      setProgress(5);
+
+      // stop any ongoing polling now that payment is confirmed
+      stopVerificationPoll();
+
+      // mark step4 as paid (visual emphasis) but do NOT change the label text here
+      const step4 = document.querySelector('.x402-progress .step[data-step="4"]');
+      if (step4) {
+        step4.classList.add('paid');
+      }
+
+      // animate final two steps (step 4 -> step 5) sequentially, 1s each
+      await animateFinalSteps();
+
       renderPaidArea({ mode: "ok", report });
       return;
     }
@@ -506,6 +731,20 @@ function runDetailed() {
   // 回答はボタン押下で表示
   setText("freeResult", FREE_REPORT);
   // 詳細は支払い後のみ
+  // If already paid, show paid-animation immediately (change label to 支払い済み)
+  if (getPaid()) {
+    const step4 = document.querySelector('.x402-progress .step[data-step="4"]');
+    if (step4) {
+      step4.innerHTML = '支払い済み';
+      step4.classList.add('paid');
+    }
+    // animate final two steps immediately; still request report in background
+    animateFinalSteps().catch(() => {});
+    // fetch the paid report (don't await so animation isn't blocked)
+    requestPaidReport();
+    return;
+  }
+
   requestPaidReport();
 }
 
@@ -584,7 +823,7 @@ function init() {
 
   const resetBtn = document.getElementById("resetState");
   if (resetBtn) {
-    resetBtn.addEventListener("click", resetAllState);
+    resetBtn.addEventListener("click", resetAllStateAndHardReload);
   }
 
   // 入力中に古いエラーを消す（入力要素が存在する場合のみ）
@@ -593,6 +832,11 @@ function init() {
     maybeInput.addEventListener("input", () => {
       setText("inputError", "");
     });
+  }
+
+  // If there's an outstanding txHash on load, start polling to detect verification
+  if (getTxHash() && !getPaid()) {
+    startVerificationPoll(3000);
   }
 }
 

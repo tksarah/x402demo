@@ -1,10 +1,36 @@
 # x402 デモ
 
+バージョン: β v0.0.1
+
 ## 概要
 このリポジトリは、「x402（Payment Required）」の概念を体験できるシンプルなデモです。
 「支払いが必要な情報アクセス」をブロックチェーン決済で疑似体験できます。
 
 ---
+
+- ## 仕様
+
+- **バージョン**: β v0.0.1
+- **目的**: x402（Payment Required）の概念をブラウザ上で疑似体験するデモアプリ。
+- **主要機能**: 無料の回答表示、支払い（疑似）後に詳細を表示するフロー（疑似 402 → 200）。
+- **プラットフォーム**: モダンブラウザ（Service Worker と secure context が必要）。
+- **支払い（疑似）**:
+  - チェーン: Soneium Minato (testnet)
+  - chainId: `1946` (0x79a)
+  - RPC: `https://rpc.minato.soneium.org`
+  - 受取先: `0xbe587b30a5514C7866b3C0EFE08e93b7c3D5BE14`
+  - テスト金額: `0.001 ETH`
+- **保存場所**: 支払い情報は `localStorage` に保存（payer, txHash, 支払い済フラグ）。
+- **疑似API**: `/api/risk-report` を Service Worker がフェイク実装し、支払い状態に応じて 402/200 を返す。
+- **セキュリティ / 注意点**: Service Worker は HTTPS（または `http://localhost`）でのみ動作。`file://` での動作不可。
+- **実行方法（最小）**: `index.html` を HTTPS 環境で配信するか、ローカルで簡易サーバを立ててブラウザで開く。
+- **主要ファイル**:
+  - `index.html` — UI
+  - `styles.css` — スタイル
+  - `app.js` — フロントエンドの疑似 402/200 ロジック
+  - `sw.js` — Service Worker（疑似API 実装）
+- **制約/既知の問題**: RPC到達性や Receipt 確定タイミングにより支払い反映に遅延が起きる可能性あり。Service Worker キャッシュに注意。
+
 
 ## デモ内容
 - 問題：「ブロックチェーンの生みの親とされているのは何者か？」

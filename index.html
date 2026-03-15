@@ -9,13 +9,13 @@
   <body>
     <main class="container">
       <header class="header">
-        <h1>x402 デモ</h1>
-        <p class="muted">
-          「支払いが必要な情報アクセス」をブロックチェーン決済で体験できるデモです。
-        </p>
-        
-
-        
+        <div class="header-title">
+          <h1>x402 デモ</h1>
+          <p class="muted">「支払いが必要な情報アクセス」をブロックチェーン決済で体験できるデモです。</p>
+        </div>
+        <div class="header-meta">
+          <span class="app-version">β v0.0.1</span>
+        </div>
       </header>
 
       <section class="card" aria-labelledby="inputTitle">
@@ -35,11 +35,13 @@
         <div id="x402-progress" class="x402-progress" aria-hidden="false">
           <div class="step" data-step="0">リクエスト</div>
           <div class="step" data-step="1">支払い要求</div>
-          <div class="step" data-step="2">支払い中</div>
-          <div class="step" data-step="3">検証</div>
-          <div class="step" data-step="4">レシート発行</div>
-          <div class="step" data-step="5">詳細表示</div>
+          <div class="step" data-step="2"><span class="two-line">支払データ<br>署名付き作成</span></div>
+          <div class="step" data-step="3">有効性検証</div>
+          <div class="step" data-step="4">支払い</div>
+          <div class="step" data-step="5">コンテンツ提供</div>
         </div>
+        <!-- 進捗に応じた解説を表示する領域 -->
+        <div id="x402-explanation" class="x402-explanation" aria-live="polite"></div>
       </section>
 
       <section class="grid" aria-label="回答">
@@ -53,7 +55,6 @@
           <div id="paidArea" aria-live="polite"></div>
         </div>
       </section>
-
       
     <footer class="footer">
       <span id="paymentBadge" class="badge" aria-live="polite"></span>

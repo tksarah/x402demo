@@ -30,6 +30,11 @@ body{
   padding:20px;
 }
 
+/* Header layout and version badge */
+.header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.header-title{flex:1}
+.app-version{font-family:var(--mono);font-weight:700;font-size:0.95rem;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,var(--accent-b),var(--accent-a));color:#fff;box-shadow:0 6px 18px rgba(138,122,107,0.12)}
+
 .header h1{margin:0 0 6px;font-size:1.6rem;letter-spacing:0.4px;color:var(--text-on-dark)}
 .muted{color:var(--muted-light)}
 
@@ -52,6 +57,9 @@ body{
   box-shadow: 0 6px 18px rgba(70,60,50,0.06);
   color: var(--text-on-card);
 }
+
+/* space between the problem card and the x402 workflow card */
+#progressCard{margin-top:5mm}
 
 /* Card titles and answer text should be white for readability */
 .card h2, .card h1 { color: var(--text-on-dark); }
@@ -89,6 +97,15 @@ body{
 .error{margin:10px 0 0;color:#9b2b2b}
 
 .footer{margin-top:18px;font-size:0.95rem;color:var(--muted);display:flex;justify-content:flex-end;gap:12px;align-items:center}
+
+/* paid-details box shown inside the paid card */
+.paid-details-box{margin-top:10px;display:flex;justify-content:flex-end;align-items:center;gap:12px}
+.paid-details-box .paid-details-box-title{margin-right:8px;color:var(--muted-dark);font-weight:700}
+.paid-details-box dl.kv{margin:0}
+
+/* Service Worker status colors */
+.sw-ready{color:#1e88e5 !important} /* blue */
+.sw-unavailable{color:#d32f2f !important} /* red */
 
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;margin-top:10px}
 .kv dt{color:var(--muted-dark)}
@@ -133,6 +150,24 @@ body{
 .x402-progress .step::after{content:'';position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:24px;height:4px;background:rgba(0,0,0,0.06)}
 .x402-progress .step:last-child::after{display:none}
 .x402-progress .step .label{display:block}
+
+/* x402 explanation area */
+.x402-explanation{margin-top:12px;padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.9),rgba(250,248,240,0.9));border:1px solid rgba(0,0,0,0.04);color:var(--muted-dark);font-size:0.98rem}
+
+/* Ordered list styling for explanation */
+.x402-explanation ol.x402-steps{margin:0;padding-left:1.1rem}
+.x402-explanation ol.x402-steps li{margin:6px 0;line-height:1.45}
+.x402-explanation .sub{margin-top:4px;margin-left:8px;color:var(--muted-dark);font-size:0.95rem}
+.x402-explanation .sub::before{content:""}
+
+/* animation highlight for sequential final-step effect */
+.x402-progress .step.anim-highlight{background:linear-gradient(90deg,#FFB86C,#FF8A65);color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(255,138,101,0.12);font-weight:800}
+.x402-progress .step.anim-highlight::after{background:#FF8A65}
+.x402-progress .step.two-line{line-height:1.05;font-size:0.92rem}
+
+/* paid state - very prominent green highlight */
+.x402-progress .step.paid{background:linear-gradient(90deg,#43A047,#2E7D32);color:#fff;border-color:transparent;box-shadow:0 8px 24px rgba(67,160,71,0.18);font-weight:900}
+.x402-progress .step.paid::after{background:linear-gradient(90deg,#66BB6A,#43A047)}
         .x402-progress .step.active{background:linear-gradient(90deg,#2E8B57,#2E8B57);color:#fff;border-color:transparent;font-weight:700}
         .x402-progress .step.completed{background:linear-gradient(90deg,#7FC29A,#7FC29A);color:#fff;border-color:transparent}
         .x402-progress .step.completed::after{background:#7FC29A}
