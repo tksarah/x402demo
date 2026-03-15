@@ -803,8 +803,24 @@ async function requestPaidReport() {
 }
 
 function runDetailed() {
-  // 回答はボタン押下で表示
-  setText("freeResult", FREE_REPORT);
+  // AIモードでは入力の送信（Submit）として動作する
+  const isAi = typeof document !== 'undefined' && document.body && document.body.classList && document.body.classList.contains('mode-ai');
+  if (isAi) {
+    const maybeInput = document.getElementById('inputText');
+    const question = maybeInput ? String(maybeInput.value || '').trim() : '';
+    if (!question) {
+      try { setText('inputError', '質問を入力してください。'); } catch (e) {}
+      if (maybeInput) maybeInput.focus();
+      return;
+    }
+    try { setText('inputError', ''); } catch (e) {}
+
+    // 入力は現状デモ的に固定回答を表示（将来的にAI呼び出しへ差し替え可能）
+    setText("freeResult", FREE_REPORT);
+  } else {
+    // 回答はボタン押下で表示
+    setText("freeResult", FREE_REPORT);
+  }
   // 詳細は支払い後のみ
   // If already paid, show paid-animation immediately (change label to 支払い済み)
   if (getPaid()) {
@@ -895,6 +911,51 @@ function init() {
   registerServiceWorker();
 
   el("runDetailed").addEventListener("click", runDetailed);
+
+  // AIモード専用の UI 調整（他モードには影響しない）
+  try {
+    const isAi = typeof document !== 'undefined' && document.body && document.body.classList && document.body.classList.contains('mode-ai');
+    if (isAi) {
+      // タイトルを「質問」に変更
+      const titleEl = document.getElementById('inputTitle');
+      if (titleEl) titleEl.textContent = '質問';
+
+      // 説明文を変更
+      const desc = document.querySelector('section.card[aria-labelledby="inputTitle"] p.muted');
+      if (desc) desc.textContent = '下の入力欄に質問を入力して「送る」を押してください。';
+
+      // 入力欄がなければ追加
+      if (!document.getElementById('inputText')) {
+        const section = document.querySelector('section.card[aria-labelledby="inputTitle"]');
+        if (section) {
+          const formRow = document.createElement('div');
+          formRow.className = 'form-row';
+          const label = document.createElement('label');
+          label.setAttribute('for', 'inputText');
+          label.className = 'muted';
+          label.textContent = '質問';
+          const input = document.createElement('input');
+          input.id = 'inputText';
+          input.type = 'text';
+          input.placeholder = '例: ブロックチェーンの生みの親は誰ですか？';
+          input.style.width = '100%';
+          input.style.padding = '8px';
+          input.style.border = '1px solid #ddd';
+          input.style.borderRadius = '4px';
+          input.style.marginTop = '6px';
+          formRow.appendChild(label);
+          formRow.appendChild(input);
+          // insert before the button row
+          const btnRow = section.querySelector('.row');
+          if (btnRow) section.insertBefore(formRow, btnRow);
+        }
+      }
+
+      // ボタンラベルを「送る」に変更
+      const runBtn = document.getElementById('runDetailed');
+      if (runBtn) runBtn.textContent = '送る';
+    }
+  } catch (e) {}
 
   const resetBtn = document.getElementById("resetState");
   if (resetBtn) {

@@ -21,7 +21,12 @@
           </div>
         </div>
         <div class="header-meta">
-          <a href="?mock=true" class="button secondary" style="background:transparent;color:#666;padding:6px 10px;font-size:0.9rem;margin-right:8px;border:none;">モックモードへ</a>
+          <label for="modeSelect" class="visually-hidden">モード選択</label>
+          <select id="modeSelect" aria-label="モード選択" style="margin-right:8px;padding:6px 8px;font-size:0.9rem;border-radius:4px;border:1px solid #ddd;">
+            <option value="normal">通常モード</option>
+            <option value="mock">モックモード</option>
+            <option value="ai">AIモード</option>
+          </select>
           <span class="app-version">β v0.0.1</span>
         </div>
       </header>
@@ -182,17 +187,62 @@
       (function(){
         try{
           const params = new URL(location.href).searchParams;
-          const isMock = params.get('mock') === 'true';
+          const modeParam = params.get('mode');
+          const isMock = params.get('mock') === 'true' || modeParam === 'mock';
+          const isAI = modeParam === 'ai';
 
           // バナー要素を動的に挿入
           const banner = document.createElement('div');
           banner.id = 'modeBanner';
-          banner.className = 'mode-banner ' + (isMock ? 'mock' : 'demo');
+          banner.className = 'mode-banner ' + (isMock ? 'mock' : (isAI ? 'ai' : 'demo'));
           banner.setAttribute('aria-hidden','true');
-          banner.textContent = isMock ? 'モックモード' : '通常モード';
+          banner.textContent = isMock ? 'モックモード' : (isAI ? 'AIモード（調整中）' : '通常モード');
           document.body.insertBefore(banner, document.body.firstChild);
-          document.body.classList.add(isMock ? 'mode-mock' : 'mode-demo');
+          document.body.classList.add(isMock ? 'mode-mock' : (isAI ? 'mode-ai' : 'mode-demo'));
           document.body.classList.add('has-mode-banner');
+
+          // ヘッダーのモード選択を初期化
+          (function wireModeSelect(){
+            try{
+              const sel = document.getElementById('modeSelect');
+              if(!sel) return;
+              if (isMock) sel.value = 'mock';
+              else if (isAI) sel.value = 'ai';
+              else sel.value = 'normal';
+
+              sel.addEventListener('change', function(){
+                const v = sel.value;
+
+                // リセット処理（UI側にある resetAllState を呼ぶ）
+                try { if (typeof window.resetAllState === 'function') window.resetAllState(); } catch (e) {}
+                try {
+                  localStorage.removeItem('x402demo.payment.paid.v1');
+                  localStorage.removeItem('x402demo.payment.payer.v1');
+                  localStorage.removeItem('x402demo.payment.txhash.v1');
+                  localStorage.removeItem('x402demo.payment.info.v1');
+                  sessionStorage.removeItem('x402demo.sw.reloadedOnce.v1');
+                } catch (e) {}
+
+                try {
+                  const url = new URL(location.href);
+                  // Clear existing mode/mock params
+                  url.searchParams.delete('mock');
+                  url.searchParams.delete('mode');
+
+                  if (v === 'mock') url.searchParams.set('mock','true');
+                  else if (v === 'ai') url.searchParams.set('mode','ai');
+
+                  url.searchParams.set('_reload', Date.now());
+                  location.replace(url.toString());
+                } catch (e) {
+                  // fallback
+                  if (v === 'mock') location.href = '?mock=true';
+                  else if (v === 'ai') location.href = '?mode=ai';
+                  else location.href = location.pathname;
+                }
+              });
+            }catch(e){}
+          })();
 
           if (isMock) {
             // タイトルに（モック）を追記（ブランド構造がある場合はサフィックスに追加して同じスタイルにする）
@@ -206,36 +256,9 @@
               }
             }
             if (!/（モック）/.test(document.title)) document.title = document.title + '（モック）';
-
-              // ヘッダー右側（.header-meta）に「通常モードへ」リンクを追加
-            const headerMeta = document.querySelector('.header-meta');
-            if (headerMeta) {
-              const btn = document.createElement('a');
-              const url = new URL(location.href);
-              url.searchParams.delete('mock');
-              btn.href = url.toString();
-              btn.textContent = '通常モードへ';
-              btn.className = 'button secondary';
-              btn.style.background = 'transparent';
-              btn.style.border = 'none';
-              btn.style.color = '#666';
-              btn.style.padding = '6px 10px';
-              btn.style.fontSize = '0.9rem';
-              btn.style.marginRight = '8px';
-              btn.setAttribute('aria-label', '通常モードへ');
-
-              const appVersionEl = headerMeta.querySelector('.app-version');
-              if (appVersionEl) headerMeta.insertBefore(btn, appVersionEl);
-              else headerMeta.appendChild(btn);
-            }
-
-            // 既にある「モックで開く」リンクがあれば非表示にする
-            const openMockLink = document.querySelector('a.button[href="?mock=true"]');
-            if (openMockLink) openMockLink.style.display = 'none';
+            // (モック表示のラベル追加済)
           } else {
-            // 通常デモ時はモックリンクを表示（もし存在すれば）
-            const openMockLink = document.querySelector('a.button[href="?mock=true"]');
-            if (openMockLink) openMockLink.style.display = '';
+            // no-op for non-mock initialization
           }
 
         }catch(e){console.error(e)}

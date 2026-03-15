@@ -307,6 +307,9 @@ body.mode-mock{
 .mode-banner.demo{background:linear-gradient(90deg,var(--accent-a),var(--accent-b));}
 .mode-banner.mock{background:linear-gradient(90deg,var(--accent-a),var(--accent-b));}
 
+/* AIモード時はバナー文字色を黒にする */
+.mode-banner.ai{ color: #000 !important; }
+
 /* コンテンツがバナーに隠れないよう余白を確保 */
 body.has-mode-banner .container{margin-top:56px}
 
