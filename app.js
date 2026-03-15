@@ -443,34 +443,35 @@ function renderPaidArea(state) {
       payBtn.className = "button";
       payBtn.textContent = "コンテンツの要求（支払要求）";
       payBtn.disabled = !payment;
-      payBtn.addEventListener("click", async () => {
+      payBtn.addEventListener("click", () => {
         if (!payment) return;
-        payBtn.disabled = true;
-        payBtn.textContent = "コンテンツ要求中...";
+        openPaymentModal(payment, async () => {
+          // user confirmed via "暗号資産" を選択した後に実際のウォレット処理を行う
+          try {
+            payBtn.disabled = true;
+            payBtn.textContent = "コンテンツ要求中...";
+            setProgress(2);
 
-        // indicate wallet interaction
-        setProgress(2);
+            const result = await payOnChain(payment);
+            if (!result.ok) {
+              renderPaidArea({ mode: "payment_required", payment, message: result.message });
+              closePaymentModal();
+              return;
+            }
 
-        const result = await payOnChain(payment);
-        if (!result.ok) {
-          renderPaidArea({
-            mode: "payment_required",
-            payment,
-            message: result.message,
-          });
-          return;
-        }
+            setPayer(result.payer);
+            setTxHash(result.txHash);
+            updatePaymentBadge();
 
-        setPayer(result.payer);
-        setTxHash(result.txHash);
-        updatePaymentBadge();
-
-        // move to verification
-        setProgress(3);
-        // 送金が通ったら、すぐ検証を行い、詳細表示を試みる
-        requestPaidReport();
-        // さらに、検証がすぐ通らない場合に備えてポーリング開始
-        startVerificationPoll(3000);
+            setProgress(3);
+            requestPaidReport();
+            startVerificationPoll(3000);
+            closePaymentModal();
+          } catch (e) {
+            renderPaidArea({ mode: "payment_required", payment, message: e instanceof Error ? e.message : String(e) });
+            closePaymentModal();
+          }
+        });
       });
     }
 
@@ -584,6 +585,80 @@ function renderPaidArea(state) {
   }
 
   throw new Error(`Unknown state.mode: ${state.mode}`);
+}
+
+// --- Payment selection modal helpers ---
+function openPaymentModal(payment, onConfirm) {
+  const overlay = document.getElementById("payment-modal-overlay");
+  const modal = document.getElementById("payment-modal");
+  if (!overlay || !modal) return;
+
+  // show
+  overlay.hidden = false;
+  modal.hidden = false;
+  overlay.classList.add("open");
+  modal.classList.add("open");
+
+  // wire buttons
+  const btnCrypto = document.getElementById("pm-crypto");
+  const btnClose = document.getElementById("pm-close");
+
+  function handleCrypto() {
+    try {
+      if (typeof onConfirm === "function") onConfirm();
+    } finally {
+      // don't rely on caller to close modal
+      closePaymentModal();
+    }
+  }
+
+  function handleClose() {
+    closePaymentModal();
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === overlay) closePaymentModal();
+  }
+
+  function handleKey(e) {
+    if (e.key === "Escape") closePaymentModal();
+  }
+
+  // attach
+  btnCrypto && btnCrypto.addEventListener("click", handleCrypto);
+  btnClose && btnClose.addEventListener("click", handleClose);
+  overlay.addEventListener("click", handleOverlayClick);
+  document.addEventListener("keydown", handleKey);
+
+  // store handlers for cleanup
+  modal._pm_handlers = { handleCrypto, handleClose, handleOverlayClick, handleKey };
+
+  // focus
+  setTimeout(() => {
+    const focusEl = document.getElementById("pm-crypto");
+    if (focusEl) focusEl.focus();
+  }, 50);
+}
+
+function closePaymentModal() {
+  const overlay = document.getElementById("payment-modal-overlay");
+  const modal = document.getElementById("payment-modal");
+  if (!overlay || !modal) return;
+
+  const handlers = modal._pm_handlers || {};
+  const btnCrypto = document.getElementById("pm-crypto");
+  const btnClose = document.getElementById("pm-close");
+
+  if (btnCrypto && handlers.handleCrypto) btnCrypto.removeEventListener("click", handlers.handleCrypto);
+  if (btnClose && handlers.handleClose) btnClose.removeEventListener("click", handlers.handleClose);
+  if (handlers.handleOverlayClick) overlay.removeEventListener("click", handlers.handleOverlayClick);
+  if (handlers.handleKey) document.removeEventListener("keydown", handlers.handleKey);
+
+  overlay.classList.remove("open");
+  modal.classList.remove("open");
+  overlay.hidden = true;
+  modal.hidden = true;
+  modal._pm_handlers = null;
 }
 
 function hasEthers() {
@@ -841,3 +916,15 @@ function init() {
 }
 
 init();
+
+// Wire up aria-expanded for the x402 diagram <details>
+(function wireDiagramDetails(){
+  try{
+    const det = document.getElementById('x402-diagram');
+    if(!det) return;
+    det.setAttribute('aria-expanded', det.open ? 'true' : 'false');
+    det.addEventListener('toggle', function(){
+      det.setAttribute('aria-expanded', det.open ? 'true' : 'false');
+    });
+  }catch(e){}
+})();

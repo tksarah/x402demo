@@ -43,6 +43,13 @@
         </div>
         <!-- 進捗に応じた解説を表示する領域 -->
         <div id="x402-explanation" class="x402-explanation" aria-live="polite"></div>
+        <!-- 折り畳み式の図（SVG） -->
+        <details id="x402-diagram" class="x402-diagram-container" aria-expanded="false">
+          <summary class="x402-diagram-summary">x402 ワークフロー図を表示</summary>
+          <div class="x402-diagram-wrap">
+            <img src="./x402-v2.svg" alt="x402 ワークフロー図" class="x402-diagram" />
+          </div>
+        </details>
       </section>
 
       <section class="grid" aria-label="回答">
@@ -82,15 +89,47 @@
 
         <h4>手順</h4>
         <ol>
-          <li>「回答を見る」でまず回答を確認</li>
-          <li>詳細は「コンテンツの要求（支払い要求）」を押し、MetaMask で送金を承認</li>
-          <li>支払い完了で詳細が表示。ページ更新後は再表示可能</li>
+          <li>「回答を見る」でまず回答を確認します。</li>
+          <li>詳細は「コンテンツの要求（支払要求）」を押すと「支払い方法の選択」ポップアップが表示されます。ここで「暗号資産」を選択してください（他は無効です）。</li>
+          <li>「暗号資産」を選択すると MetaMask の承認画面へ進み、送金を承認します。</li>
+          <li>支払い完了で詳細が表示されます。ページを更新すると再表示可能です。</li>
         </ol>
 
         <p>補足: フッターの「状態をリセット」で初期状態に戻ります。</p>
       </div>
     </aside>
     <div id="drawer-overlay" class="drawer-overlay" hidden></div>
+
+    <!-- Payment selection modal -->
+    <div id="payment-modal-overlay" class="modal-overlay" hidden></div>
+    <div id="payment-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="paymentModalTitle" hidden>
+      <div class="modal-header">
+        <h3 id="paymentModalTitle">支払い方法の選択</h3>
+        <button id="pm-close" class="modal-close" aria-label="閉じる">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="payment-conditions">
+          <dl class="kv">
+            <dt>ネットワーク</dt>
+            <dd>Soneium Minato テストネット</dd>
+            <dt>暗号資産</dt>
+            <dd>ETH</dd>
+            <dt>価格</dt>
+            <dd>0.001 ETH</dd>
+          </dl>
+        </div>
+        <p class="muted">支払い方法を選択します。</p>
+
+        <div class="payment-methods row" style="margin-top:14px">
+          <button id="pm-stable" class="button" type="button" disabled>ステーブルコイン</button>
+          <button id="pm-crypto" class="button" type="button">暗号資産</button>
+          <button id="pm-cc" class="button" type="button" disabled>クレジットカード</button>
+          <button id="pm-qr" class="button" type="button" disabled>QRコード決済</button>
+        </div>
+
+        <p class="muted small modal-note" style="margin-top:12px">本デモでは、”暗号資産”支払いのみが有効です。</p>
+      </div>
+    </div>
 
     <script>
       (function(){

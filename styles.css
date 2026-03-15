@@ -190,6 +190,15 @@ details summary{cursor:pointer;padding:8px 10px;border-radius:8px;background:lin
 /* paid-area の details（支払い情報）上部に余白を入れる */
 .paid-details{margin-top:14px}
 
+/* x402 図（SVG）折り畳み用スタイル */
+.x402-diagram-container{margin-top:12px}
+.x402-diagram-summary{font-weight:700;color:var(--accent-a);}
+.x402-diagram-wrap{margin-top:10px;padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.96),rgba(250,248,246,0.96));border:1px solid rgba(0,0,0,0.04)}
+.x402-diagram{display:block;max-width:100%;height:auto;border-radius:8px}
+
+/* シンプルな開閉アニメーション */
+details[x402-anim] .x402-diagram-wrap{transition:max-height 260ms ease,opacity 180ms ease;overflow:hidden}
+
 .empha{font-weight:700;color:#fff;background:linear-gradient(90deg,rgba(166,124,82,0.12),rgba(122,168,116,0.06));padding:4px 8px;border-radius:8px;display:inline-block;font-family:var(--mono)}
 
 
@@ -237,6 +246,28 @@ details summary{cursor:pointer;padding:8px 10px;border-radius:8px;background:lin
 
 .drawer-overlay{position:fixed;inset:0;background:var(--drawer-overlay);opacity:0;transition:opacity 260ms ease;z-index:1100}
 .drawer.open + .drawer-overlay{opacity:1}
+
+/* Payment modal styles */
+.modal-overlay{position:fixed;inset:0;background:rgba(6,10,20,0.45);z-index:1400;display:none}
+.modal-overlay.open{display:block}
+.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.98);min-width:320px;max-width:680px;background:var(--card);border-radius:12px;padding:16px;box-shadow:0 18px 48px rgba(20,20,20,0.3);z-index:1500;display:none}
+.modal.open{display:block;transform:translate(-50%,-50%) scale(1)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.modal-header h3{margin:0;font-size:1.05rem;flex:1;text-align:center;font-weight:900;color:var(--accent-a);padding-bottom:8px;border-bottom:3px solid rgba(140,122,107,0.12)}
+.modal-close{appearance:none;border:0;background:transparent;cursor:pointer;font-size:1.05rem}
+.modal-body{padding-top:10px}
+.payment-methods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.payment-methods .button{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:10px 14px}
+
+/* Modal specific tweaks: make condition labels bold */
+.modal .payment-conditions dt { font-weight: 800; }
+
+/* Modal note in red */
+.modal-note { color: #d32f2f; }
+
+/* Ensure .muted.modal-note overrides the general .muted color rule */
+.muted.modal-note { color: #d32f2f; }
+
 
 /* compact trigger */
 .button.secondary{background:transparent;color:var(--text-on-dark);border:1px solid rgba(0,0,0,0.06);box-shadow:none;padding:8px 12px}
