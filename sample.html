@@ -140,6 +140,44 @@ h1 {
   border: none;
   border-radius: 6px;
 }
+
+
+/* -------------------------
+   Slide-over Drawer (右ドロワー) - transform ベース
+-------------------------- */
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  transform: translateX(100%);
+  will-change: transform, opacity;
+  width: 360px;
+  height: 100%;
+  background: #fff;
+  box-shadow: -12px 0 24px rgba(0,0,0,0.18);
+  transition: transform 260ms cubic-bezier(.2,.9,.2,1), opacity 180ms ease;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+}
+.drawer.open { transform: translateX(0); }
+.drawer-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px;
+  border-bottom:1px solid #eee;
+}
+.drawer-body { padding:16px; overflow:auto; }
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.36);
+  z-index: 1100;
+}
+
+.problem-card { background: #fff; border: 1px solid #e6e6e6; }
+
 </style>
 
 </head>
@@ -192,6 +230,66 @@ h1 {
   </div>
 
 </div>
+</div>
+
+<!-- スライドオーバー（右ドロワー）モック -->
+<div class="layout-demo" style="margin-top:40px;">
+  <div class="problem-card section" style="max-width:900px;">
+    <h2>問題カード（サンプル）</h2>
+    <p>ここに問題文の要約を表示します。右の「やり方」を参照できます。</p>
+    <div style="margin-top:16px;">
+      <button id="open-drawer" class="btn">やり方を表示</button>
+    </div>
+  </div>
+</div>
+
+<aside id="drawer" class="drawer" aria-hidden="true">
+  <div class="drawer-header">
+    <h3>やり方</h3>
+    <button id="close-drawer" aria-label="閉じる">✕</button>
+  </div>
+  <div class="drawer-body">
+    <p><strong>ステップ：</strong></p>
+    <ol>
+      <li>問題をよく読む</li>
+      <li>条件を整理する</li>
+      <li>手順を実行して答えを検証する</li>
+    </ol>
+    <p><strong>所要時間：</strong>約 10 分</p>
+    <label><input type="checkbox"> ステップ1 完了</label><br>
+    <label><input type="checkbox"> ステップ2 完了</label>
+  </div>
+</aside>
+<div id="drawer-overlay" class="drawer-overlay" hidden></div>
+
+<script>
+  (function(){
+    const openBtn = document.getElementById('open-drawer');
+    const closeBtn = document.getElementById('close-drawer');
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('drawer-overlay');
+
+    function openDrawer(){
+      drawer.classList.add('open');
+      drawer.setAttribute('aria-hidden','false');
+      overlay.hidden = false;
+      document.body.style.overflow = 'hidden';
+      closeBtn.focus();
+    }
+    function closeDrawer(){
+      drawer.classList.remove('open');
+      drawer.setAttribute('aria-hidden','true');
+      overlay.hidden = true;
+      document.body.style.overflow = '';
+      openBtn.focus();
+    }
+
+    openBtn.addEventListener('click', openDrawer);
+    closeBtn.addEventListener('click', closeDrawer);
+    overlay.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape' && drawer.classList.contains('open')) closeDrawer(); });
+  })();
+</script>
 
 </body>
 </html>

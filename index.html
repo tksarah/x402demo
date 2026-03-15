@@ -25,6 +25,7 @@
           <button id="runDetailed" class="button" type="button">
             回答を見る
           </button>
+          <button id="open-drawer" class="button secondary" type="button">やり方を表示</button>
         </div>
         <p id="inputError" class="error" role="status" aria-live="polite"></p>
       </section>
@@ -64,6 +65,61 @@
       </div>
     </footer>
     </main>
+
+    <!-- スライドオーバー（右ドロワー） -->
+    <aside id="drawer" class="drawer" aria-hidden="true">
+      <div class="drawer-header">
+        <h3>デモンストレーション</h3>
+        <button id="close-drawer" aria-label="閉じる">✕</button>
+      </div>
+      <div class="drawer-body">
+        <h4>前提</h4>
+        <ul>
+          <li>MetaMask をインストール済み</li>
+          <li>Soneium Minato テストネット登録済み</li>
+          <li>ETH ≥ 0.001（テストトークン）</li>
+        </ul>
+
+        <h4>手順</h4>
+        <ol>
+          <li>「回答を見る」でまず回答を確認</li>
+          <li>詳細は「コンテンツの要求（支払い要求）」を押し、MetaMask で送金を承認</li>
+          <li>支払い完了で詳細が表示。ページ更新後は再表示可能</li>
+        </ol>
+
+        <p>補足: フッターの「状態をリセット」で初期状態に戻ります。</p>
+      </div>
+    </aside>
+    <div id="drawer-overlay" class="drawer-overlay" hidden></div>
+
+    <script>
+      (function(){
+        const openBtn = document.getElementById('open-drawer');
+        const closeBtn = document.getElementById('close-drawer');
+        const drawer = document.getElementById('drawer');
+        const overlay = document.getElementById('drawer-overlay');
+
+        function openDrawer(){
+          drawer.classList.add('open');
+          drawer.setAttribute('aria-hidden','false');
+          overlay.hidden = false;
+          document.body.style.overflow = 'hidden';
+          closeBtn.focus();
+        }
+        function closeDrawer(){
+          drawer.classList.remove('open');
+          drawer.setAttribute('aria-hidden','true');
+          overlay.hidden = true;
+          document.body.style.overflow = '';
+          openBtn.focus();
+        }
+
+        openBtn && openBtn.addEventListener('click', openDrawer);
+        closeBtn && closeBtn.addEventListener('click', closeDrawer);
+        overlay && overlay.addEventListener('click', closeDrawer);
+        document.addEventListener('keydown', function(e){ if(e.key==='Escape' && drawer.classList.contains('open')) closeDrawer(); });
+      })();
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
     <script src="./app.js"></script>
