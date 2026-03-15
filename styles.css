@@ -105,20 +105,6 @@ body{
   padding: 6px 0;
 }
 
-/* x402 progress bar */
-.x402-progress{display:flex;gap:8px;align-items:center;margin-top:12px}
-.x402-progress .step{flex:1;position:relative;padding:10px 8px;text-align:center;border-radius:10px;color:var(--muted-dark);background:transparent;border:1px solid rgba(0,0,0,0.04)}
-.x402-progress .step::after{content:'';position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:24px;height:4px;background:rgba(0,0,0,0.06)}
-.x402-progress .step:last-child::after{display:none}
-.x402-progress .step.active{background:linear-gradient(90deg,var(--accent-a),var(--accent-b));color:#fff;border-color:transparent;font-weight:700}
-.x402-progress .step.completed{background:linear-gradient(90deg,var(--accent-b),var(--accent-a));color:#fff;border-color:transparent}
-.x402-progress .step .label{display:block}
-
-@media(max-width:700px){
-  .x402-progress{flex-direction:column;gap:10px}
-  .x402-progress .step::after{display:none}
-}
-
 .payment-proof .proof-item strong {
   display: block;
   color: var(--accent-a);
@@ -139,6 +125,28 @@ body{
   user-select: all;
   word-break: break-all;
   border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* x402 progress bar */
+.x402-progress{display:flex;gap:8px;align-items:center;margin-top:12px}
+.x402-progress .step{flex:1;position:relative;padding:10px 8px;text-align:center;border-radius:10px;color:var(--muted-dark);background:transparent;border:1px solid rgba(0,0,0,0.04)}
+.x402-progress .step::after{content:'';position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:24px;height:4px;background:rgba(0,0,0,0.06)}
+.x402-progress .step:last-child::after{display:none}
+.x402-progress .step .label{display:block}
+        .x402-progress .step.active{background:linear-gradient(90deg,#2E8B57,#2E8B57);color:#fff;border-color:transparent;font-weight:700}
+        .x402-progress .step.completed{background:linear-gradient(90deg,#7FC29A,#7FC29A);color:#fff;border-color:transparent}
+        .x402-progress .step.completed::after{background:#7FC29A}
+        .x402-progress .step.active::after{background:#7FC29A}
+        .x402-progress .step .label{display:block}
+
+@media(max-width:700px){
+  .x402-progress{flex-direction:column;gap:10px}
+  .x402-progress .step::after{display:none}
+}
+
+@media(max-width:700px){
+  .x402-progress{flex-direction:column;gap:10px}
+  .x402-progress .step::after{display:none}
 }
 
 

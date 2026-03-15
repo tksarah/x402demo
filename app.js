@@ -104,22 +104,21 @@ function updatePaymentBadge() {
     : "支払い状態：未払い";
 }
 
-// -------------------------
-// x402 progress UI helpers
-// -------------------------
+/* ------------------
+   Progress UI logic
+   ------------------ */
 const X402_STEPS = [
   "リクエスト",
   "支払い要求",
   "支払い中",
   "検証",
-  "トークン発行",
+  "レシート発行",
   "詳細表示",
 ];
 
 function initProgress() {
   const wrap = document.getElementById("x402-progress");
   if (!wrap) return;
-  // Ensure labels match (in case HTML changed); keep existing nodes if present
   const nodes = wrap.querySelectorAll(".step");
   if (nodes.length === X402_STEPS.length) return;
   wrap.innerHTML = "";
@@ -143,18 +142,16 @@ function setProgress(stepIndex) {
 }
 
 function syncProgressWithState() {
-  // Decide initial step based on stored payment state
   if (getPaid()) {
     setProgress(5);
     return;
   }
   if (getTxHash()) {
-    // sent but not confirmed: verification
     setProgress(3);
     return;
   }
-  // default idle/request state
   setProgress(0);
+}
 
 function updateSwBadge() {
   const badge = el("swBadge");
@@ -188,6 +185,8 @@ function renderPaidArea(state) {
   }
 
   if (state.mode === "payment_required") {
+    // reflect that server asked for payment
+    setProgress(1);
     const title = document.createElement("p");
     title.innerHTML = "<strong>HTTP 402 Payment Required</strong>";
 
@@ -272,8 +271,9 @@ function renderPaidArea(state) {
         payBtn.disabled = true;
         payBtn.textContent = "支払い処理中...";
 
-        // mark as paying while wallet interaction occurs
+        // indicate wallet interaction
         setProgress(2);
+
         const result = await payOnChain(payment);
         if (!result.ok) {
           renderPaidArea({
@@ -288,6 +288,8 @@ function renderPaidArea(state) {
         setTxHash(result.txHash);
         updatePaymentBadge();
 
+        // move to verification
+        setProgress(3);
         // 送金が通ったら、すぐ検証を行い、詳細表示を試みる
         requestPaidReport();
       });
@@ -301,8 +303,6 @@ function renderPaidArea(state) {
     retryBtn.addEventListener("click", () => {
       requestPaidReport();
     });
-            // reflect progress: payment is required
-            setProgress(1);
 
     if (payBtn) row.appendChild(payBtn);
     row.appendChild(retryBtn);
@@ -317,6 +317,8 @@ function renderPaidArea(state) {
       // ボタン群を先に追加し、その下に折りたたみを置く
       container.appendChild(row);
       container.appendChild(detailsWrap);
+      // tx がある段階は検証中
+      setProgress(3);
       return;
     }
 
@@ -329,8 +331,6 @@ function renderPaidArea(state) {
       const warn = document.createElement("p");
       warn.className = "muted";
       warn.textContent = state.message;
-          // txHash がある段階は検証中
-          setProgress(3);
       container.appendChild(warn);
     }
 
@@ -341,6 +341,8 @@ function renderPaidArea(state) {
   }
 
   if (state.mode === "ok") {
+    // success -> final step
+    setProgress(5);
     const pre = document.createElement("pre");
     pre.className = "pre";
     pre.textContent = state.report || "";
@@ -470,7 +472,6 @@ async function requestPaidReport() {
     if (resp.status === 402) {
       setPaid(false);
       updatePaymentBadge();
-      // payment required -> step
       setProgress(1);
       const data = await resp.json().catch(() => null);
       const payment = data && data.payment ? data.payment : null;
@@ -484,7 +485,6 @@ async function requestPaidReport() {
       const report = data && typeof data.report === "string" ? data.report : "";
       setPaid(true);
       updatePaymentBadge();
-      // token issued / ok -> mark progress complete
       setProgress(5);
       renderPaidArea({ mode: "ok", report });
       return;
@@ -573,7 +573,8 @@ function init() {
   updatePaymentBadge();
   setSwStatus("pending");
   renderPaidArea({ mode: "empty" });
-  // initialize progress UI
+
+  // initialize progress UI and sync with stored payment state
   initProgress();
   syncProgressWithState();
 
@@ -586,7 +587,7 @@ function init() {
     resetBtn.addEventListener("click", resetAllState);
   }
 
-  // 入力中に古いエラーを消す（入力要素があれば）
+  // 入力中に古いエラーを消す（入力要素が存在する場合のみ）
   const maybeInput = document.getElementById("inputText");
   if (maybeInput) {
     maybeInput.addEventListener("input", () => {
