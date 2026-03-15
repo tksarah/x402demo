@@ -33,6 +33,16 @@ body{
 /* Header layout and version badge */
 .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
 .header-title{flex:1}
+/* Brand: modern gradient + logo + slogan (案1 + 案3) */
+.brand{display:flex;align-items:center;gap:14px}
+.brand-logo{width:56px;height:56px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:1.05rem;background:linear-gradient(135deg,var(--accent-a),var(--accent-b));box-shadow:0 10px 28px rgba(43,154,243,0.12)}
+.brand-text h1{margin:0;font-size:1.5rem;line-height:1}
+.brand-main{font-weight:900;background:linear-gradient(90deg,var(--accent-a),var(--accent-b));-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand-suffix{font-weight:800;color:var(--muted-dark);font-size:0.95rem;margin-left:6px}
+.brand-sub{margin:6px 0 0;font-size:0.95rem;color:var(--muted-dark);font-weight:600}
+@keyframes brandPop{from{transform:translateY(-6px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+.brand{animation:brandPop .42s cubic-bezier(.2,.9,.2,1)}
+@media(max-width:700px){.brand-logo{width:44px;height:44px;font-size:0.95rem}.brand-text h1{font-size:1.2rem}}
 .app-version{font-family:var(--mono);font-weight:700;font-size:0.95rem;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,var(--accent-b),var(--accent-a));color:#fff;box-shadow:0 6px 18px rgba(138,122,107,0.12)}
 
 .header h1{margin:0 0 6px;font-size:1.6rem;letter-spacing:0.4px;color:var(--text-on-dark)}
@@ -223,7 +233,7 @@ details[x402-anim] .x402-diagram-wrap{transition:max-height 260ms ease,opacity 1
   --drawer-radius:18px;
 }
 
-.drawer{position:fixed;top:0;right:0;transform:translateX(100%);will-change:transform,opacity;width:var(--drawer-width);height:100%;background:var(--drawer-bg);backdrop-filter: blur(8px) saturate(120%);-webkit-backdrop-filter: blur(8px) saturate(120%);border-left:1px solid rgba(255,255,255,0.06);box-shadow:-28px 12px 60px var(--drawer-shadow);border-top-left-radius:var(--drawer-radius);border-bottom-left-radius:var(--drawer-radius);transition:transform 320ms cubic-bezier(.16,.84,.24,1), opacity 220ms ease;z-index:1200;display:flex;flex-direction:column;overflow:hidden}
+.drawer{position:fixed;top:0;right:0;transform:translateX(100%);will-change:transform,opacity;width:var(--drawer-width);height:100%;background:var(--drawer-bg);backdrop-filter: blur(8px) saturate(120%);-webkit-backdrop-filter: blur(8px) saturate(120%);border-left:1px solid rgba(255,255,255,0.06);box-shadow:-28px 12px 60px var(--drawer-shadow);border-top-left-radius:var(--drawer-radius);border-bottom-left-radius:var(--drawer-radius);transition:transform 320ms cubic-bezier(.16,.84,.24,1), opacity 220ms ease;z-index:1800;display:flex;flex-direction:column;overflow:hidden}
 .drawer.open{transform:translateX(0)}
 
 .drawer-header{position:relative;display:flex;align-items:center;justify-content:space-between;padding:18px 16px;border-bottom:1px solid rgba(0,0,0,0.04);gap:12px}
@@ -244,13 +254,13 @@ details[x402-anim] .x402-diagram-wrap{transition:max-height 260ms ease,opacity 1
 .drawer .cta{display:inline-block;margin-top:14px;padding:10px 14px;border-radius:12px;background:var(--drawer-accent);color:#fff;font-weight:800;border:0;cursor:pointer;box-shadow:0 8px 24px rgba(140,122,107,0.12)}
 .drawer .cta:hover{transform:translateY(-3px)}
 
-.drawer-overlay{position:fixed;inset:0;background:var(--drawer-overlay);opacity:0;transition:opacity 260ms ease;z-index:1100}
+.drawer-overlay{position:fixed;inset:0;background:var(--drawer-overlay);opacity:0;transition:opacity 260ms ease;z-index:1790}
 .drawer.open + .drawer-overlay{opacity:1}
 
 /* Payment modal styles */
-.modal-overlay{position:fixed;inset:0;background:rgba(6,10,20,0.45);z-index:1400;display:none}
+.modal-overlay{position:fixed;inset:0;background:rgba(6,10,20,0.45);z-index:1900;display:none}
 .modal-overlay.open{display:block}
-.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.98);min-width:320px;max-width:680px;background:var(--card);border-radius:12px;padding:16px;box-shadow:0 18px 48px rgba(20,20,20,0.3);z-index:1500;display:none}
+.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.98);min-width:320px;max-width:680px;background:var(--card);border-radius:12px;padding:16px;box-shadow:0 18px 48px rgba(20,20,20,0.3);z-index:1950;display:none}
 .modal.open{display:block;transform:translate(-50%,-50%) scale(1)}
 .modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .modal-header h3{margin:0;font-size:1.05rem;flex:1;text-align:center;font-weight:900;color:var(--accent-a);padding-bottom:8px;border-bottom:3px solid rgba(140,122,107,0.12)}
@@ -273,3 +283,35 @@ details[x402-anim] .x402-diagram-wrap{transition:max-height 260ms ease,opacity 1
 .button.secondary{background:transparent;color:var(--text-on-dark);border:1px solid rgba(0,0,0,0.06);box-shadow:none;padding:8px 12px}
 
 @media(max-width:900px){:root{--drawer-width:100%}.drawer{transform:translateX(100%)}.drawer.open{transform:translateX(0)}.drawer{border-top-left-radius:10px;border-bottom-left-radius:0}}
+
+/* -------------------------
+   Mode-specific backgrounds and top banner
+   - body.mode-demo / body.mode-mock で配色切替
+   - JS が .has-mode-banner を付与するのでコンテナ余白を調整
+-------------------------- */
+body.mode-demo{
+  --bg-1: #eef6ff;
+  --bg-2: #e6f3ff;
+  --accent-a: #0b74de;
+  --accent-b: #2b9af3;
+}
+body.mode-mock{
+  --bg-1: #fff8e6;
+  --bg-2: #fff3e0;
+  --accent-a: #d47a00;
+  --accent-b: #ffb14d;
+}
+
+.mode-banner{
+  position:fixed;left:0;right:0;top:0;height:42px;display:flex;align-items:center;justify-content:center;z-index:1600;color:#fff;font-weight:800;letter-spacing:0.6px;box-shadow:0 6px 20px rgba(0,0,0,0.08);pointer-events:none;font-size:0.95rem;text-transform:none}
+.mode-banner.demo{background:linear-gradient(90deg,var(--accent-a),var(--accent-b));}
+.mode-banner.mock{background:linear-gradient(90deg,var(--accent-a),var(--accent-b));}
+
+/* コンテンツがバナーに隠れないよう余白を確保 */
+body.has-mode-banner .container{margin-top:56px}
+
+@media(max-width:600px){
+  .mode-banner{height:36px;font-size:0.9rem}
+  body.has-mode-banner .container{margin-top:48px}
+}
+

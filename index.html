@@ -7,13 +7,21 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <!-- Mode banner (挿入: JSでモードに応じて内容とクラスを設定) -->
+    <!-- JS追加で body に mode-demo / mode-mock クラスと has-mode-banner を付与します -->
     <main class="container">
       <header class="header">
         <div class="header-title">
-          <h1>x402 デモ</h1>
-          <p class="muted">「支払いが必要な情報アクセス」をブロックチェーン決済で体験できるデモです。</p>
+          <div class="brand">
+            <div class="brand-logo" aria-hidden="true">X4</div>
+            <div class="brand-text">
+              <h1><span class="brand-main">x402</span> <span class="brand-suffix">デモ</span></h1>
+              <p class="brand-sub muted">支払いが必要な情報アクセスをブロックチェーンで体験</p>
+            </div>
+          </div>
         </div>
         <div class="header-meta">
+          <a href="?mock=true" class="button secondary" style="background:transparent;color:#666;padding:6px 10px;font-size:0.9rem;margin-right:8px;border:none;">モックモードへ</a>
           <span class="app-version">β v0.0.1</span>
         </div>
       </header>
@@ -76,7 +84,7 @@
     <!-- スライドオーバー（右ドロワー） -->
     <aside id="drawer" class="drawer" aria-hidden="true">
       <div class="drawer-header">
-        <h3>デモンストレーション</h3>
+        <h3>ヘルプ</h3>
         <button id="close-drawer" aria-label="閉じる">✕</button>
       </div>
       <div class="drawer-body">
@@ -88,11 +96,21 @@
         </ul>
 
         <h4>手順</h4>
+
+        <h5>通常モード（MetaMask を利用する実機確認）</h5>
         <ol>
           <li>「回答を見る」でまず回答を確認します。</li>
-          <li>詳細は「コンテンツの要求（支払要求）」を押すと「支払い方法の選択」ポップアップが表示されます。ここで「暗号資産」を選択してください（他は無効です）。</li>
-          <li>「暗号資産」を選択すると MetaMask の承認画面へ進み、送金を承認します。</li>
-          <li>支払い完了で詳細が表示されます。ページを更新すると再表示可能です。</li>
+          <li>詳細は「コンテンツの要求（支払要求）」を押すと「支払い方法の選択」ポップアップが表示されます。ここで<strong>暗号資産（ETH）</strong>を選択してください（他は無効です）。</li>
+          <li>暗号資産を選択すると MetaMask の承認画面が開きます。実際のテストネットウォレットで送金を承認してください。</li>
+          <li>支払いが完了すると詳細が表示されます。ページを更新すると再表示できます。</li>
+        </ol>
+
+        <h5>モックモード（開発・確認用）</h5>
+        <ol>
+          <li>モックモードは画面上部の「モックで開く」リンク、または URL に <code>?mock=true</code> を付与して起動します。</li>
+          <li>モックモードでは実際のウォレットは不要で、ページ内のモックウォレットが支払い処理をシミュレーションします。</li>
+          <li>支払いはシミュレーションのためブロックチェーン送金は発生しません。動作確認や UI 検証にご利用ください。</li>
+          <li>モックモード中はヘッダーに「通常モードに戻る」リンクが表示され、これで実機確認モードへ戻せます。</li>
         </ol>
 
         <p>補足: フッターの「状態をリセット」で初期状態に戻ります。</p>
@@ -160,7 +178,110 @@
       })();
     </script>
 
+    <script>
+      (function(){
+        try{
+          const params = new URL(location.href).searchParams;
+          const isMock = params.get('mock') === 'true';
+
+          // バナー要素を動的に挿入
+          const banner = document.createElement('div');
+          banner.id = 'modeBanner';
+          banner.className = 'mode-banner ' + (isMock ? 'mock' : 'demo');
+          banner.setAttribute('aria-hidden','true');
+          banner.textContent = isMock ? 'モックモード' : '通常モード';
+          document.body.insertBefore(banner, document.body.firstChild);
+          document.body.classList.add(isMock ? 'mode-mock' : 'mode-demo');
+          document.body.classList.add('has-mode-banner');
+
+          if (isMock) {
+            // タイトルに（モック）を追記（ブランド構造がある場合はサフィックスに追加して同じスタイルにする）
+            const suffixEl = document.querySelector('.brand-suffix');
+            if (suffixEl) {
+              if (!/（モック）/.test(suffixEl.textContent)) suffixEl.textContent = suffixEl.textContent + '（モック）';
+            } else {
+              const titleEl = document.querySelector('.header-title h1');
+              if (titleEl && !/（モック）/.test(titleEl.textContent)) {
+                titleEl.textContent = titleEl.textContent + '（モック）';
+              }
+            }
+            if (!/（モック）/.test(document.title)) document.title = document.title + '（モック）';
+
+              // ヘッダー右側（.header-meta）に「通常モードへ」リンクを追加
+            const headerMeta = document.querySelector('.header-meta');
+            if (headerMeta) {
+              const btn = document.createElement('a');
+              const url = new URL(location.href);
+              url.searchParams.delete('mock');
+              btn.href = url.toString();
+              btn.textContent = '通常モードへ';
+              btn.className = 'button secondary';
+              btn.style.background = 'transparent';
+              btn.style.border = 'none';
+              btn.style.color = '#666';
+              btn.style.padding = '6px 10px';
+              btn.style.fontSize = '0.9rem';
+              btn.style.marginRight = '8px';
+              btn.setAttribute('aria-label', '通常モードへ');
+
+              const appVersionEl = headerMeta.querySelector('.app-version');
+              if (appVersionEl) headerMeta.insertBefore(btn, appVersionEl);
+              else headerMeta.appendChild(btn);
+            }
+
+            // 既にある「モックで開く」リンクがあれば非表示にする
+            const openMockLink = document.querySelector('a.button[href="?mock=true"]');
+            if (openMockLink) openMockLink.style.display = 'none';
+          } else {
+            // 通常デモ時はモックリンクを表示（もし存在すれば）
+            const openMockLink = document.querySelector('a.button[href="?mock=true"]');
+            if (openMockLink) openMockLink.style.display = '';
+          }
+
+        }catch(e){console.error(e)}
+      })();
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
     <script src="./app.js"></script>
+    <script src="./mock-wallet.js"></script>
+    <script>
+      (function(){
+        // モード切替リンク(?mock)をクリックしたら、必ず状態リセット相当の処理を行ってから遷移する
+        document.addEventListener('click', function(e){
+          try{
+            const a = e.target.closest && e.target.closest('a');
+            if (!a || !a.href) return;
+            const target = new URL(a.href, location.href);
+            const current = new URL(location.href);
+            const targetMock = target.searchParams.get('mock');
+            const currentMock = current.searchParams.get('mock');
+            if (targetMock === currentMock) return; // モード変更がないなら無視
+
+            e.preventDefault();
+
+            // UI 側のリセット関数があれば呼ぶ
+            try { if (typeof window.resetAllState === 'function') window.resetAllState(); } catch (e) {}
+
+            // 主要なキーを削除（resetAllState と同等）
+            try {
+              localStorage.removeItem('x402demo.payment.paid.v1');
+              localStorage.removeItem('x402demo.payment.payer.v1');
+              localStorage.removeItem('x402demo.payment.txhash.v1');
+              localStorage.removeItem('x402demo.payment.info.v1');
+              sessionStorage.removeItem('x402demo.sw.reloadedOnce.v1');
+            } catch (e) {}
+
+            // キャッシュバスター付きで目的URLへ遷移（replaceで履歴を汚さない）
+            try {
+              target.searchParams.set('_reload', Date.now());
+              location.replace(target.toString());
+            } catch (e) {
+              location.href = a.href;
+            }
+          }catch(e){/* ignore */}
+        }, true);
+      })();
+    </script>
   </body>
 </html>

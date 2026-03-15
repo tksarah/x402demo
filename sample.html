@@ -143,6 +143,45 @@ h1 {
 
 
 /* -------------------------
+   Title Style Samples (ts-*)
+-------------------------- */
+.title-samples{display:grid;grid-template-columns:1fr;gap:18px;margin-bottom:28px}
+.ts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.title-card{background:#fff;padding:18px;border-radius:12px;border:1px solid #e9e9e9;min-height:120px;display:flex;align-items:center;gap:14px}
+
+/* 1. Modern Gradient */
+.ts-modern h2{margin:0;font-size:1.6rem;font-weight:900;background:linear-gradient(90deg,#0b74de,#6dd5fa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ts-modern p{margin:6px 0 0;color:#666}
+
+/* 2. Neon */
+.ts-neon{background:#0b1020;color:#e6f6ff}
+.ts-neon h2{margin:0;font-size:1.6rem;font-weight:900;color:#9be8ff;text-shadow:0 4px 18px rgba(11,116,222,0.28),0 0 8px rgba(155,232,255,0.18)}
+.ts-neon p{color:rgba(255,255,255,0.76);margin-top:6px}
+
+/* 3. Logo + Slogan */
+.ts-logo{display:flex;align-items:center}
+.ts-logo .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#ffb14d,#d47a00);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:1.35rem;flex-shrink:0}
+.ts-logo .text h2{margin:0;font-size:1.4rem;font-weight:900}
+.ts-logo .text p{margin:6px 0 0;color:#666}
+
+/* 4. Stamp / Badge */
+.ts-badge{display:flex;align-items:center;gap:12px}
+.badge-wrap{width:84px;height:84px;border-radius:50%;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;box-shadow:0 10px 30px rgba(0,0,0,0.2)}
+.ts-badge .title{font-size:1.25rem;font-weight:900}
+
+/* 5. Animated Pop */
+@keyframes popIn{from{transform:translateY(-8px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+.ts-animated h2{margin:0;font-size:1.5rem;font-weight:900;animation:popIn .42s cubic-bezier(.2,.9,.2,1)}
+.ts-animated p{margin-top:6px;color:#666}
+.ts-animated h2:hover{transform:translateY(-4px);transition:transform .18s}
+
+/* 6. Terminal / Cyber */
+.ts-term{background:#020407;color:#bfffbf;border-radius:8px;padding:12px}
+.ts-term h2{margin:0;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Noto Sans Mono", monospace;font-weight:700;color:#9fffa8}
+.ts-term p{margin-top:6px;color:#9aa79a;font-family:ui-monospace,monospace}
+
+
+/* -------------------------
    Slide-over Drawer (右ドロワー) - transform ベース
 -------------------------- */
 .drawer {
@@ -184,6 +223,54 @@ h1 {
 <body>
 
 <h1>見やすさ重視のカラーリング比較</h1>
+
+<section class="title-samples">
+  <h2 style="margin:0 0 12px;">タイトルスタイルサンプル</h2>
+  <div class="ts-grid">
+    <div class="title-card ts-modern">
+      <div style="flex:1">
+        <h2>x402 <small style="font-weight:700;color:#666;font-size:0.9rem;margin-left:6px">デモ</small></h2>
+        <p>モダンなグラデーションで洗練された印象。</p>
+      </div>
+    </div>
+
+    <div class="title-card ts-neon">
+      <div style="flex:1">
+        <h2>x402 デモ</h2>
+        <p>ネオンの発光で視認性とインパクトを両立。</p>
+      </div>
+    </div>
+
+    <div class="title-card">
+      <div class="ts-logo" style="flex:1">
+        <div class="logo">X4</div>
+        <div class="text">
+          <h2>x402 <span style="font-weight:600;color:#666;font-size:0.95rem">デモ</span></h2>
+          <p>Secure paid access — ブロックチェーン体験</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="title-card ts-badge">
+      <div class="badge-wrap">BETA</div>
+      <div class="title">x402 デモ</div>
+    </div>
+
+    <div class="title-card ts-animated">
+      <div style="flex:1">
+        <h2>x402 デモ</h2>
+        <p>読み込みでアニメーションするダイナミックな見出し。</p>
+      </div>
+    </div>
+
+    <div class="title-card ts-term">
+      <div style="flex:1">
+        <h2>x402 デモ</h2>
+        <p>等幅フォントと端末風の雰囲気で技術感を強調。</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 <div class="grid">
 
