@@ -119,6 +119,23 @@
         </ol>
 
         <p>補足: フッターの「状態をリセット」で初期状態に戻ります。</p>
+
+        <h4>外部API設定（AIモード用）</h4>
+        <p class="muted small">このデモから呼ぶ外部APIの API キーを保存します。保存したキーはブラウザのローカルストレージにのみ保存されます。</p>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+          <input id="apiKeyInput" type="text" placeholder="Authorization: Bearer ..." style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+          <button id="saveApiKey" class="button" type="button">保存</button>
+          <button id="clearApiKey" class="button secondary" type="button">削除</button>
+        </div>
+        <p id="apiKeyNotice" class="muted small" style="margin-top:6px"></p>
+        <h4 style="margin-top:12px">外部APIの Base URL</h4>
+        <p class="muted small">ここで指定した Base URL が、AIモードで外部 Copilot サーバへ送るリクエスト先として使われます（例: <code>http://192.168.2.101:3000</code>）。</p>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+          <input id="baseUrlInput" type="text" placeholder="http://host:port" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+          <button id="saveBaseUrl" class="button" type="button">保存</button>
+          <button id="clearBaseUrl" class="button secondary" type="button">削除</button>
+        </div>
+        <p id="baseUrlNotice" class="muted small" style="margin-top:6px"></p>
       </div>
     </aside>
     <div id="drawer-overlay" class="drawer-overlay" hidden></div>

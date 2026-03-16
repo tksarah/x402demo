@@ -17,6 +17,8 @@ let swStatus = "pending";
 let verificationPollId = null;
 let finalAnimationRunning = false;
 let finalAnimationDone = false;
+// AIモードで最後に送信したプロンプトを保持（支払い後の詳細取得に使用）
+let lastAiPrompt = null;
 
 const FREE_REPORT = `サトシ・ナカモト`;
 
@@ -770,7 +772,7 @@ async function requestPaidReport() {
 
     if (resp.ok) {
       const data = await resp.json().catch(() => null);
-      const report = data && typeof data.report === "string" ? data.report : "";
+      let report = data && typeof data.report === "string" ? data.report : "";
       setPaid(true);
       updatePaymentBadge();
 
@@ -782,6 +784,24 @@ async function requestPaidReport() {
       if (step4) {
         step4.classList.add('paid');
       }
+
+      // In AI mode, attempt to call the external Copilot API with the stored prompt + " 詳細に"
+      try {
+        const isAi = typeof document !== 'undefined' && document.body && document.body.classList && document.body.classList.contains('mode-ai');
+        if (isAi && lastAiPrompt) {
+          try {
+            const apiKey = (function(){ try { return localStorage.getItem('copilot.api_key'); } catch(e){ return null; } })();
+            const promptForDetail = String(lastAiPrompt) + " 詳細に";
+            const cop = await callCopilot(promptForDetail, { apiKey });
+            if (cop && cop.ok) {
+              const out = cop.output === null || cop.output === undefined ? (cop.raw ? JSON.stringify(cop.raw, null, 2) : '') : cop.output;
+              report = typeof out === 'string' ? out : JSON.stringify(out, null, 2);
+            }
+          } catch (e) {
+            // ignore AI errors and retain server report as fallback
+          }
+        }
+      } catch (e) {}
 
       // animate final two steps (step 4 -> step 5) sequentially, 1s each
       await animateFinalSteps();
@@ -802,6 +822,87 @@ async function requestPaidReport() {
   }
 }
 
+/**
+ * Call external Copilot API (POST /copilot)
+ * Expects Authorization: Bearer <API_KEY> to be present in headers (from localStorage by default)
+ * Returns { ok: true, output, raw } or { ok: false, error }
+ */
+async function callCopilot(prompt, { apiKey = null, baseUrl = null, timeoutMs = 30000, maxRetries = 3 } = {}) {
+  if (!apiKey) {
+    try { apiKey = localStorage.getItem('copilot.api_key') || null; } catch (e) { apiKey = null; }
+  }
+  if (!apiKey) return { ok: false, error: { code: 'NO_API_KEY', message: 'APIキーが設定されていません。設定してください。' } };
+
+  // baseUrl: 引数優先 → localStorage → 既存デフォルトフォールバック
+  if (!baseUrl) {
+    try { baseUrl = localStorage.getItem('copilot.base_url') || null; } catch (e) { baseUrl = null; }
+  }
+  if (!baseUrl) baseUrl = 'http://192.168.2.101:3000';
+  // 簡易正規化: スラッシュ末尾を除去、スキームが無ければ http を付与
+  try {
+    if (!/^https?:\/\//i.test(baseUrl)) baseUrl = 'http://' + baseUrl;
+  } catch (e) {}
+
+  const url = String(baseUrl).replace(/\/$/, '') + '/copilot';
+  const body = JSON.stringify({ prompt, model: 'gpt-4.1' });
+
+  const sleep = ms => new Promise(res => setTimeout(res, ms));
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body,
+        signal: controller.signal,
+        credentials: 'omit',
+      });
+      clearTimeout(id);
+
+      if (res.status === 401) return { ok: false, error: { code: 401, message: 'Unauthorized' } };
+      if (res.status === 400) return { ok: false, error: { code: 400, message: 'Bad Request' } };
+      if (res.status === 429) {
+        // backoff and retry
+        const wait = 1000 * Math.pow(2, attempt);
+        await sleep(wait);
+        continue;
+      }
+      if (res.status >= 500) {
+        // retry on server error
+        const wait = 1000 * Math.pow(2, attempt);
+        await sleep(wait);
+        continue;
+      }
+
+      if (!res.ok) {
+        const txt = await res.text().catch(() => '');
+        return { ok: false, error: { code: res.status, message: txt || res.statusText } };
+      }
+
+      const json = await res.json().catch(() => null);
+      const output = json && (json.output !== undefined ? json.output : null);
+      return { ok: true, output, raw: json };
+    } catch (err) {
+      clearTimeout(id);
+      if (err && err.name === 'AbortError') {
+        // timeout
+        if (attempt < maxRetries - 1) continue;
+        return { ok: false, error: { code: 'TIMEOUT', message: 'Request timed out' } };
+      }
+      if (attempt === maxRetries - 1) {
+        return { ok: false, error: { code: 'FETCH_ERROR', message: err && err.message ? err.message : String(err) } };
+      }
+      // otherwise retry
+    }
+  }
+  return { ok: false, error: { code: 'RETRY_EXHAUSTED', message: 'Retries exhausted' } };
+}
+
 function runDetailed() {
   // AIモードでは入力の送信（Submit）として動作する
   const isAi = typeof document !== 'undefined' && document.body && document.body.classList && document.body.classList.contains('mode-ai');
@@ -815,8 +916,29 @@ function runDetailed() {
     }
     try { setText('inputError', ''); } catch (e) {}
 
-    // 入力は現状デモ的に固定回答を表示（将来的にAI呼び出しへ差し替え可能）
-    setText("freeResult", FREE_REPORT);
+    // AIモード: 外部 API を呼び出して結果を表示
+    (async () => {
+      try {
+        setText('freeResult', '（送信中…）');
+        // 保存しておく（支払い後に詳細リクエストを行うため）
+        lastAiPrompt = question;
+        // retrieve api key from localStorage if saved
+        const apiKey = (function(){ try { return localStorage.getItem('copilot.api_key'); } catch(e){ return null; } })();
+        const res = await callCopilot(question, { apiKey });
+        if (!res.ok) {
+          const msg = res.error && res.error.message ? res.error.message : '外部API呼び出しに失敗しました。';
+          setText('freeResult', '');
+          setText('inputError', msg);
+          return;
+        }
+        // display output (string or JSON)
+        const out = res.output === null || res.output === undefined ? (res.raw ? JSON.stringify(res.raw, null, 2) : '') : res.output;
+        setText('freeResult', typeof out === 'string' ? out : JSON.stringify(out, null, 2));
+      } catch (e) {
+        setText('freeResult', '');
+        setText('inputError', e && e.message ? e.message : String(e));
+      }
+    })();
   } else {
     // 回答はボタン押下で表示
     setText("freeResult", FREE_REPORT);
@@ -961,6 +1083,96 @@ function init() {
   if (resetBtn) {
     resetBtn.addEventListener("click", resetAllStateAndHardReload);
   }
+
+  // APIキーの保存（AIモード用）
+  try {
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const saveBtn = document.getElementById('saveApiKey');
+    const clearBtn = document.getElementById('clearApiKey');
+    const notice = document.getElementById('apiKeyNotice');
+    if (apiKeyInput && saveBtn && clearBtn && notice) {
+      try {
+        const saved = localStorage.getItem('copilot.api_key');
+        if (saved) {
+          apiKeyInput.value = saved;
+          notice.textContent = 'APIキーが保存されています。';
+        } else {
+          notice.textContent = '未設定';
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      saveBtn.addEventListener('click', () => {
+        try {
+          let v = String(apiKeyInput.value || '').trim();
+          if (!v) {
+            notice.textContent = '空のキーは保存できません。';
+            return;
+          }
+          if (v.toLowerCase().startsWith('bearer ')) v = v.slice(7).trim();
+          localStorage.setItem('copilot.api_key', v);
+          notice.textContent = '保存しました';
+        } catch (e) {
+          notice.textContent = '保存に失敗しました';
+        }
+      });
+
+      clearBtn.addEventListener('click', () => {
+        try {
+          localStorage.removeItem('copilot.api_key');
+          apiKeyInput.value = '';
+          notice.textContent = '削除しました';
+        } catch (e) {
+          notice.textContent = '削除に失敗しました';
+        }
+      });
+
+      // Base URL 保存（AIモードの外部 API エンドポイント）
+      const baseUrlInput = document.getElementById('baseUrlInput');
+      const saveBaseUrl = document.getElementById('saveBaseUrl');
+      const clearBaseUrl = document.getElementById('clearBaseUrl');
+      const baseUrlNotice = document.getElementById('baseUrlNotice');
+      if (baseUrlInput && saveBaseUrl && clearBaseUrl && baseUrlNotice) {
+        try {
+          const savedUrl = localStorage.getItem('copilot.base_url');
+          if (savedUrl) {
+            baseUrlInput.value = savedUrl;
+            baseUrlNotice.textContent = 'Base URL が保存されています。';
+          } else {
+            baseUrlNotice.textContent = '未設定';
+          }
+        } catch (e) {
+          // ignore
+        }
+
+        saveBaseUrl.addEventListener('click', () => {
+          try {
+            let u = String(baseUrlInput.value || '').trim();
+            if (!u) {
+              baseUrlNotice.textContent = '空の URL は保存できません。';
+              return;
+            }
+            u = u.replace(/\/$/, '');
+            localStorage.setItem('copilot.base_url', u);
+            baseUrlNotice.textContent = '保存しました';
+          } catch (e) {
+            baseUrlNotice.textContent = '保存に失敗しました';
+          }
+        });
+
+        clearBaseUrl.addEventListener('click', () => {
+          try {
+            localStorage.removeItem('copilot.base_url');
+            baseUrlInput.value = '';
+            baseUrlNotice.textContent = '削除しました';
+          } catch (e) {
+            baseUrlNotice.textContent = '削除に失敗しました';
+          }
+        });
+      }
+    }
+  } catch (e) {}
 
   // 入力中に古いエラーを消す（入力要素が存在する場合のみ）
   const maybeInput = document.getElementById("inputText");
