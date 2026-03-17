@@ -27,7 +27,7 @@
             <option value="mock">モックモード</option>
             <option value="ai">AIモード</option>
           </select>
-          <span class="app-version">β v0.0.1</span>
+          <span class="app-version">β v0.5.0</span>
         </div>
       </header>
 
@@ -93,49 +93,62 @@
         <button id="close-drawer" aria-label="閉じる">✕</button>
       </div>
       <div class="drawer-body">
-        <h4>前提</h4>
-        <ul>
-          <li>MetaMask をインストール済み</li>
-          <li>Soneium Minato テストネット登録済み</li>
-          <li>ETH ≥ 0.001（テストトークン）</li>
-        </ul>
+        <div id="help-prereq">
+          <h4>前提</h4>
+          <ul>
+            <li>MetaMask をインストール済み</li>
+            <li>Soneium Minato テストネット登録済み</li>
+            <li>ETH ≥ 0.001（テストトークン）</li>
+          </ul>
+        </div>
 
         <h4>手順</h4>
 
-        <h5>通常モード（MetaMask を利用する実機確認）</h5>
-        <ol>
-          <li>「回答を見る」でまず回答を確認します。</li>
-          <li>詳細は「コンテンツの要求（支払要求）」を押すと「支払い方法の選択」ポップアップが表示されます。ここで<strong>暗号資産（ETH）</strong>を選択してください（他は無効です）。</li>
-          <li>暗号資産を選択すると MetaMask の承認画面が開きます。実際のテストネットウォレットで送金を承認してください。</li>
-          <li>支払いが完了すると詳細が表示されます。ページを更新すると再表示できます。</li>
-        </ol>
-
-        <h5>モックモード（開発・確認用）</h5>
-        <ol>
-          <li>モックモードは画面上部の「モックで開く」リンク、または URL に <code>?mock=true</code> を付与して起動します。</li>
-          <li>モックモードでは実際のウォレットは不要で、ページ内のモックウォレットが支払い処理をシミュレーションします。</li>
-          <li>支払いはシミュレーションのためブロックチェーン送金は発生しません。動作確認や UI 検証にご利用ください。</li>
-          <li>モックモード中はヘッダーに「通常モードに戻る」リンクが表示され、これで実機確認モードへ戻せます。</li>
-        </ol>
-
-        <p>補足: フッターの「状態をリセット」で初期状態に戻ります。</p>
-
-        <h4>外部API設定（AIモード用）</h4>
-        <p class="muted small">このデモから呼ぶ外部APIの API キーを保存します。保存したキーはブラウザのローカルストレージにのみ保存されます。</p>
-        <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
-          <input id="apiKeyInput" type="text" placeholder="Authorization: Bearer ..." style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;" />
-          <button id="saveApiKey" class="button" type="button">保存</button>
-          <button id="clearApiKey" class="button secondary" type="button">削除</button>
+        <div id="help-normal">
+          <h5>通常モード（MetaMask を利用する実機確認）</h5>
+          <ol>
+            <li>「回答を見る」でまず回答を確認します。</li>
+            <li>詳細な回答を確認したい場合は「コンテンツの要求（支払要求）」を押します。</li>
+            <li>「支払い方法の選択」ポップアップが表示されますので、ここで暗号資産（ETH）を選択してください。</li>
+            <li>暗号資産を選択すると MetaMask の承認画面が開きます。実際のテストネットウォレットで送金を承認してください。</li>
+            <li>支払いが完了すると詳細が表示されます。</li>
+          </ol>
         </div>
-        <p id="apiKeyNotice" class="muted small" style="margin-top:6px"></p>
-        <h4 style="margin-top:12px">外部APIの Base URL</h4>
-        <p class="muted small">ここで指定した Base URL が、AIモードで外部 Copilot サーバへ送るリクエスト先として使われます（例: <code>http://192.168.2.101:3000</code>）。</p>
-        <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
-          <input id="baseUrlInput" type="text" placeholder="http://host:port" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;" />
-          <button id="saveBaseUrl" class="button" type="button">保存</button>
-          <button id="clearBaseUrl" class="button secondary" type="button">削除</button>
+
+        <div id="help-mock">
+          <h5>モックモード（開発・確認用）</h5>
+          <p>モックモードでは実際のウォレットは不要で、ページ内のモックウォレットが支払い処理をシミュレーションします。支払いはシミュレーションのためブロックチェーン送金は発生しません。</p>
+          <ol>
+            <li>「回答を見る」でまず回答を確認します。</li>
+            <li>詳細な回答を確認したい場合は「コンテンツの要求（支払要求）」を押します。</li>
+            <li>「支払い方法の選択」ポップアップが表示されますので、ここで暗号資産を選択してください。</li>
+            <li>モック支払い（デモ）のポップアップでは”承認（成功）”を押すと詳細が表示されます。</li>
+            <li>”拒否する”や”承認（失敗）”を押すとキャンセルされます。</li>
+          </ol>
         </div>
-        <p id="baseUrlNotice" class="muted small" style="margin-top:6px"></p>
+
+        <div id="help-supplement">
+          <p>補足: フッターの「状態をリセット」で初期状態に戻ります。</p>
+        </div>
+
+        <div id="ai-settings">
+          <h4>外部API設定（AIモード用）</h4>
+          <p class="muted small">このデモから呼ぶ外部APIの API キーを保存します。保存したキーはブラウザのローカルストレージにのみ保存されます。</p>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+            <input id="apiKeyInput" type="text" placeholder="Authorization: Bearer ..." style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+            <button id="saveApiKey" class="button" type="button">保存</button>
+            <button id="clearApiKey" class="button secondary" type="button">削除</button>
+          </div>
+          <p id="apiKeyNotice" class="muted small" style="margin-top:6px"></p>
+          <h4 style="margin-top:12px">外部APIの Base URL</h4>
+          <p class="muted small">ここで指定した Base URL が、AIモードで外部 Copilot サーバへ送るリクエスト先として使われます（例: <code>http://192.168.2.101:3000</code>）。</p>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+            <input id="baseUrlInput" type="text" placeholder="http://host:port" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+            <button id="saveBaseUrl" class="button" type="button">保存</button>
+            <button id="clearBaseUrl" class="button secondary" type="button">削除</button>
+          </div>
+          <p id="baseUrlNotice" class="muted small" style="margin-top:6px"></p>
+        </div>
       </div>
     </aside>
     <div id="drawer-overlay" class="drawer-overlay" hidden></div>
@@ -217,6 +230,61 @@
           document.body.insertBefore(banner, document.body.firstChild);
           document.body.classList.add(isMock ? 'mode-mock' : (isAI ? 'mode-ai' : 'mode-demo'));
           document.body.classList.add('has-mode-banner');
+
+          // ドロワー表示をモードに応じて調整する
+          function updateDrawerForMode(isAi, isMock) {
+            try {
+              const drawer = document.getElementById('drawer');
+              if (!drawer) return;
+              const headerH3 = drawer.querySelector('.drawer-header h3');
+              if (headerH3) headerH3.textContent = isAi ? '環境設定' : 'ヘルプ';
+              const bodyEl = drawer.querySelector('.drawer-body');
+              if (!bodyEl) return;
+
+              const aiSettings = document.getElementById('ai-settings');
+              const helpPrereq = document.getElementById('help-prereq');
+              const helpNormal = document.getElementById('help-normal');
+              const helpMock = document.getElementById('help-mock');
+              const helpSupplement = document.getElementById('help-supplement');
+
+              if (isAi) {
+                // AIモード: ai-settings のみ表示
+                Array.from(bodyEl.children).forEach((child) => {
+                  if (child === aiSettings) child.style.display = '';
+                  else child.style.display = 'none';
+                });
+                return;
+              }
+
+              // 非AIモード: ai-settings は非表示にする
+              if (aiSettings) aiSettings.style.display = 'none';
+
+              if (isMock) {
+                // モックモード: help-mock と 補足のみ表示
+                if (helpPrereq) helpPrereq.style.display = 'none';
+                if (helpNormal) helpNormal.style.display = 'none';
+                if (helpMock) helpMock.style.display = '';
+                if (helpSupplement) helpSupplement.style.display = '';
+                // hide any other unexpected children
+                Array.from(bodyEl.children).forEach((child) => {
+                  if (![helpMock, helpSupplement].includes(child)) child.style.display = (child === helpMock || child === helpSupplement) ? '' : 'none';
+                });
+                return;
+              }
+
+              // 通常モード: 前提 + 通常モードセクション + 補足 を表示
+              if (helpPrereq) helpPrereq.style.display = '';
+              if (helpNormal) helpNormal.style.display = '';
+              if (helpMock) helpMock.style.display = 'none';
+              if (helpSupplement) helpSupplement.style.display = '';
+              Array.from(bodyEl.children).forEach((child) => {
+                if (![helpPrereq, helpNormal, helpSupplement].includes(child)) child.style.display = 'none';
+              });
+            } catch (e) { /* no-op */ }
+          }
+
+          // 初期化時に反映
+          updateDrawerForMode(isAI, isMock);
 
           // ヘッダーのモード選択を初期化
           (function wireModeSelect(){
